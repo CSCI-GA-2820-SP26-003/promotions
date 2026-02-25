@@ -15,7 +15,7 @@
 ######################################################################
 
 """
-TestYourResourceModel API Service Test Suite
+TestPromotion API Service Test Suite
 """
 
 # pylint: disable=duplicate-code
@@ -24,11 +24,14 @@ import logging
 from unittest import TestCase
 from wsgi import app
 from service.common import status
-from service.models import db, YourResourceModel
+from service.models import db, Promotion
+from service.utils import PromotionType, _parse_date
+from .factories import PromotionFactory
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
+BASE_URL = "/promotions"
 
 
 ######################################################################
@@ -56,7 +59,7 @@ class TestYourResourceService(TestCase):
     def setUp(self):
         """Runs before each test"""
         self.client = app.test_client()
-        db.session.query(YourResourceModel).delete()  # clean up the last tests
+        db.session.query(Promotion).delete()  # clean up the last tests
         db.session.commit()
 
     def tearDown(self):
@@ -72,4 +75,58 @@ class TestYourResourceService(TestCase):
         resp = self.client.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
-    # Todo: Add your test cases here...
+    # ----------------------------------------------------------
+    # TEST CREATE
+    # ----------------------------------------------------------
+    def test_create_promotion(self):
+        """It should Create a new Promotion"""
+        test_promotion = PromotionFactory()
+        logging.debug("Test Promotion: %s", test_promotion.serialize())
+        response = self.client.post(BASE_URL, json=test_promotion.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # Make sure location header is set
+        location = response.headers.get("Location", None)
+        self.assertIsNotNone(location)
+
+        # Check the data is correct
+        new_promotion = response.get_json()
+        # self.assertIsInstance(test_promotion.id, str)
+        self.assertEqual(new_promotion["id"], test_promotion.id)
+        self.assertEqual(new_promotion["name"], test_promotion.name)
+        self.assertEqual(
+            PromotionType(new_promotion["promotion_type"]),
+            test_promotion.promotion_type,
+        )
+        self.assertEqual(
+            _parse_date(new_promotion["start_date"]), test_promotion.start_date
+        )
+        self.assertEqual(
+            _parse_date(new_promotion["end_date"]), test_promotion.end_date
+        )
+        self.assertEqual(new_promotion["value"], test_promotion.value)
+        self.assertEqual(new_promotion["active"], test_promotion.active)
+
+        # Todo: uncomment this code when get_promotions is implemented
+        # Check that the location header was correct
+        # response = self.client.get(location)
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # new_promotion = response.get_json()
+        # self.assertEqual(new_promotion["id"], test_promotion.id)
+        # self.assertEqual(new_promotion["name"], test_promotion.name)
+        # self.assertEqual(
+        #     PromotionType(new_promotion["promotion_type"]),
+        #     test_promotion.promotion_type,
+        # )
+        # self.assertEqual(
+        #     _parse_date(new_promotion["start_date"]), test_promotion.start_date
+        # )
+        # self.assertEqual(
+        #     _parse_date(new_promotion["end_date"]), test_promotion.end_date
+        # )
+        # self.assertEqual(new_promotion["value"], test_promotion.value)
+        # self.assertEqual(new_promotion["active"], test_promotion.active)
+
+    # ----------------------------------------------------------
+    # TEST UPDATE
+    # ----------------------------------------------------------
