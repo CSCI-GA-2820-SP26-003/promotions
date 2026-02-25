@@ -15,7 +15,7 @@
 ######################################################################
 
 """
-Test cases for Pet Model
+Test cases for Promotion Model
 """
 
 # pylint: disable=duplicate-code
@@ -23,8 +23,10 @@ import os
 import logging
 from unittest import TestCase
 from wsgi import app
-from service.models import YourResourceModel, DataValidationError, db
-from .factories import YourResourceModelFactory
+from service.models import Promotion, DataValidationError, db
+from service.utils import PromotionType
+from .factories import PromotionFactory
+from datetime import date
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -32,11 +34,11 @@ DATABASE_URI = os.getenv(
 
 
 ######################################################################
-#  YourResourceModel   M O D E L   T E S T   C A S E S
+#  Promotion   M O D E L   T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
-class TestYourResourceModel(TestCase):
-    """Test Cases for YourResourceModel Model"""
+class TestPromotion(TestCase):
+    """Test Cases for Promotion Model"""
 
     @classmethod
     def setUpClass(cls):
@@ -54,7 +56,7 @@ class TestYourResourceModel(TestCase):
 
     def setUp(self):
         """This runs before each test"""
-        db.session.query(YourResourceModel).delete()  # clean up the last tests
+        db.session.query(Promotion).delete()  # clean up the last tests
         db.session.commit()
 
     def tearDown(self):
@@ -66,14 +68,34 @@ class TestYourResourceModel(TestCase):
     ######################################################################
 
     def test_example_replace_this(self):
-        """It should create a YourResourceModel"""
+        """It should create a Promotion"""
         # Todo: Remove this test case example
-        resource = YourResourceModelFactory()
+        resource = PromotionFactory()
         resource.create()
         self.assertIsNotNone(resource.id)
-        found = YourResourceModel.all()
+        found = Promotion.all()
         self.assertEqual(len(found), 1)
-        data = YourResourceModel.find(resource.id)
+        data = Promotion.find(resource.id)
         self.assertEqual(data.name, resource.name)
 
     # Todo: Add your test cases here...
+    def test_create_a_promotion(self):
+        """It should Create a promotion and assert that it exists"""
+        promotion = Promotion(
+            id=32467,
+            name="Free Shipping for New Members",
+            promotion_type=PromotionType.FREE_SHIPPING,
+            start_date=date(2026, 1, 19),
+            end_date=date(2026, 2, 18),
+            value=10,
+            active=False,
+        )
+        # self.assertEqual(str(promotion), "<Promotion Fido id=[None]>")
+        self.assertTrue(promotion is not None)
+        self.assertEqual(promotion.id, 32467)
+        self.assertEqual(promotion.name, "Free Shipping for New Members")
+        self.assertEqual(promotion.promotion_type, PromotionType.FREE_SHIPPING)
+        self.assertEqual(promotion.start_date, date(2026, 1, 19))
+        self.assertEqual(promotion.end_date, date(2026, 2, 18))
+        self.assertEqual(promotion.value, 10)
+        self.assertEqual(promotion.active, False)
