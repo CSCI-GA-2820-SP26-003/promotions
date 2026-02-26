@@ -159,3 +159,33 @@ class Promotion(db.Model):
         """
         logger.info("Processing name query for %s ...", name)
         return cls.query.filter(cls.name == name)
+
+    @classmethod
+    def find_by_promotion_type(cls, promotion_type: str) -> list:
+        """Returns all of the Pets in a promotion_type
+
+        :param promotion_type: the promotion_type of the Pets you want to match
+        :type promotion_type: str
+
+        :return: a collection of Pets in that promotion type
+        :rtype: list
+
+        """
+        logger.info("Processing category query for %s ...", promotion_type)
+        return cls.query.filter(cls.promotion_type == promotion_type)
+
+    @classmethod
+    def find_by_active(cls, active) -> list:
+        """Returns all Promotions by their active status
+
+        :param active: True for pets that are active
+        :type active: str
+
+        :return: a collection of Promotions that are active
+        :rtype: list
+
+        """
+        if not isinstance(active, bool):
+            raise TypeError("Invalid active, must be of type boolean")
+        logger.info("Processing available query for %s ...", active)
+        return cls.query.filter(cls.active == active)

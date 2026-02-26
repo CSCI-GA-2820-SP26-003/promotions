@@ -22,6 +22,7 @@ TestPromotion API Service Test Suite
 import os
 import logging
 from unittest import TestCase
+from urllib.parse import quote_plus
 from wsgi import app
 from service.common import status
 from service.models import db, Promotion
@@ -38,7 +39,7 @@ BASE_URL = "/promotions"
 #  T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
-class TestYourResourceService(TestCase):
+class TestPromotionService(TestCase):
     """REST API Server Tests"""
 
     @classmethod
@@ -161,3 +162,81 @@ class TestYourResourceService(TestCase):
     # ----------------------------------------------------------
     # TEST UPDATE
     # ----------------------------------------------------------
+
+    # ----------------------------------------------------------
+    # TEST DELETE
+    # ----------------------------------------------------------
+
+    # ----------------------------------------------------------
+    # TEST QUERY
+    # ----------------------------------------------------------
+    def test_query_by_name(self):
+        """It should Query Promotions by name"""
+        promotions = self._create_promotions(5)
+        test_name = promotions[0].name
+        name_count = len(
+            [promotion for promotion in promotions if promotion.name == test_name]
+        )
+        response = self.client.get(
+            BASE_URL, query_string=f"name={quote_plus(test_name)}"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), name_count)
+        # check the data just to be sure
+        for promotion in data:
+            self.assertEqual(promotion["name"], test_name)
+
+    def test_query_promotion_list_by_type(self):
+        """It should Query Pets by Promotion Type"""
+        promotions = self._create_promotions(10)
+        fs_promotions = [
+            promotion
+            for promotion in promotions
+            if promotion.promotion_type == PromotionType.FREE_SHIPPING
+        ]
+
+        response = self.client.get(
+            BASE_URL, query_string="promotion_type=FREE_SHIPPING"
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), len(fs_promotions))
+        for promotion in data:
+            self.assertEqual(
+                promotion["promotion_type"], PromotionType.FREE_SHIPPING.value
+            )
+
+    def test_query_by_active(self):
+        """It should Query Pets by active status"""
+        promotions = self._create_promotions(10)
+        active_promotions = [
+            promotion for promotion in promotions if promotion.active is True
+        ]
+        inactive_promotions = [
+            promotion for promotion in promotions if promotion.active is False
+        ]
+        active_count = len(active_promotions)
+        inactive_count = len(inactive_promotions)
+        logging.debug("Active Promotions [%d] %s", active_count, active_promotions)
+        logging.debug(
+            "Inactive Promotions [%d] %s", inactive_count, inactive_promotions
+        )
+
+        # test for active
+        response = self.client.get(BASE_URL, query_string="active=true")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), active_count)
+        # check the data just to be sure
+        for promotion in data:
+            self.assertEqual(promotion["active"], True)
+
+        # test for inactive
+        response = self.client.get(BASE_URL, query_string="active=false")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), inactive_count)
+        # check the data just to be sure
+        for promotion in data:
+            self.assertEqual(promotion["active"], False)

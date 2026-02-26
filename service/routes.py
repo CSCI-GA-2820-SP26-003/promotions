@@ -25,6 +25,7 @@ from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
 from service.models import Promotion
 from service.common import status  # HTTP Status Codes
+from service.utils import PromotionType
 
 
 ######################################################################
@@ -42,6 +43,41 @@ def index():
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
+
+
+######################################################################
+# LIST ALL PETS
+######################################################################
+@app.route("/promotions", methods=["GET"])
+def list_promotions():
+    """Returns all of the Promotions"""
+    app.logger.info("Request for promotion list")
+
+    promotions = []
+
+    name = request.args.get("name")
+    promotion_type = request.args.get("promotion_type")
+    active = request.args.get("active")
+
+    if name:
+        app.logger.info("Find by name: %s", name)
+        promotions = Promotion.find_by_name(name)
+    elif promotion_type:
+        app.logger.info("Find by promotion_type: %s", promotion_type)
+        promotions = Promotion.find_by_promotion_type(
+            PromotionType[promotion_type.upper()]
+        )
+    elif active:
+        app.logger.info("Find by active: %s", active)
+        active_value = active.lower() in ["true", "yes", "1"]
+        promotions = Promotion.find_by_active(active_value)
+    else:
+        app.logger.info("Find all")
+        promotions = Promotion.all()
+
+    results = [promotion.serialize() for promotion in promotions]
+    app.logger.info("Returning %d promotions", len(results))
+    return jsonify(results), status.HTTP_200_OK
 
 
 ######################################################################
