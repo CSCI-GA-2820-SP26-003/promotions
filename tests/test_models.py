@@ -99,3 +99,14 @@ class TestPromotion(TestCase):
         self.assertEqual(promotion.end_date, date(2026, 2, 18))
         self.assertEqual(promotion.value, 10)
         self.assertEqual(promotion.active, False)
+
+    def test_list_promotions(self):
+        """It should list all Promotions in the database"""
+        promotions = Promotion.all()
+        self.assertEqual(promotions, [])
+        for _ in range(5):
+            promotion = PromotionFactory()
+            promotion.create()
+        # See if we get back 5 promotions
+        promotions = Promotion.all()
+        self.assertEqual(len(promotions), 5)
