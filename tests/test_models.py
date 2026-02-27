@@ -99,3 +99,12 @@ class TestPromotion(TestCase):
         self.assertEqual(promotion.end_date, date(2026, 2, 18))
         self.assertEqual(promotion.value, 10)
         self.assertEqual(promotion.active, False)
+
+    def test_delete_a_promotion(self):
+        """It should Delete a promotion"""
+        promotion = PromotionFactory()
+        promotion.create()
+        self.assertEqual(len(Promotion.all()), 1)
+        # delete the pet and make sure it isn't in the database
+        promotion.delete()
+        self.assertEqual(len(Promotion.all()), 0)
