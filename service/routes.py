@@ -68,13 +68,30 @@ def create_promotions():
 
     # Return the location of the new Promotion
     # Todo: uncomment this code when get_promotions is implemented
-    # location_url = url_for("get_promotions", promotion_id=promotion.id, _external=True)
-    location_url = "unknown"
+    location_url = url_for("get_promotions", promotion_id=promotion.id, _external=True)
+    # location_url = "unknown"
     return (
         jsonify(promotion.serialize()),
         status.HTTP_201_CREATED,
         {"Location": location_url},
     )
+
+######################################################################
+# RETRIEVE A PROMOTION
+######################################################################
+@app.route("/promotions/<int:promotion_id>", methods=["GET"])
+def get_promotions(promotion_id):
+    """
+    Retrieve a single Promotion
+    This endpoint will return a Promotion based on its id
+    """
+    app.logger.info("Request to Retrieve a promotion with id [%s]", promotion_id)
+
+    promotion = Promotion.find(promotion_id)
+    if not promotion:
+        abort(status.HTTP_404_NOT_FOUND, f"Promotion with id '{promotion_id}' was not found.")
+
+    return jsonify(promotion.serialize()), status.HTTP_200_OK
 
 
 ######################################################################
