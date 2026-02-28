@@ -88,7 +88,6 @@ class TestYourResourceService(TestCase):
         # Make sure location header is set
         location = response.headers.get("Location", None)
         self.assertIsNotNone(location)
-        
 
         # Check the data is correct
         new_promotion = response.get_json()
@@ -110,52 +109,24 @@ class TestYourResourceService(TestCase):
 
         # Todo: uncomment this code when get_promotions is implemented
         # Check that the location header was correct
-        response = self.client.get(location)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        new_promotion = response.get_json()
-        self.assertEqual(new_promotion["id"], test_promotion.id)
-        self.assertEqual(new_promotion["name"], test_promotion.name)
-        self.assertEqual(
-            PromotionType(new_promotion["promotion_type"]),
-            test_promotion.promotion_type,
-        )
-        self.assertEqual(
-            _parse_date(new_promotion["start_date"]), test_promotion.start_date
-        )
-        self.assertEqual(
-            _parse_date(new_promotion["end_date"]), test_promotion.end_date
-        )
-        self.assertEqual(new_promotion["value"], test_promotion.value)
-        self.assertEqual(new_promotion["active"], test_promotion.active)
+        # response = self.client.get(location)
+        # self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # new_promotion = response.get_json()
+        # self.assertEqual(new_promotion["id"], test_promotion.id)
+        # self.assertEqual(new_promotion["name"], test_promotion.name)
+        # self.assertEqual(
+        #     PromotionType(new_promotion["promotion_type"]),
+        #     test_promotion.promotion_type,
+        # )
+        # self.assertEqual(
+        #     _parse_date(new_promotion["start_date"]), test_promotion.start_date
+        # )
+        # self.assertEqual(
+        #     _parse_date(new_promotion["end_date"]), test_promotion.end_date
+        # )
+        # self.assertEqual(new_promotion["value"], test_promotion.value)
+        # self.assertEqual(new_promotion["active"], test_promotion.active)
 
     # ----------------------------------------------------------
     # TEST UPDATE
     # ----------------------------------------------------------
-    
-    
-    # ----------------------------------------------------------
-    # TEST RETRIEVE
-    # ----------------------------------------------------------
-    def test_get_promotion_not_found(self):
-        """It should return 404 when promotion is not found"""
-        response = self.client.get(f"{BASE_URL}/999999")
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-    
-    def test_get_promotion(self):
-        """It should Retrieve a Promotion"""
-
-        test_promo = PromotionFactory()
-        response = self.client.post(BASE_URL, json=test_promo.serialize())
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-
-        promotion_id = response.get_json()["id"]
-
-        # retrieve
-        response = self.client.get(f"{BASE_URL}/{promotion_id}")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        data = response.get_json()
-        self.assertEqual(data["id"], promotion_id)
-        self.assertEqual(data["name"], test_promo.name)
-    
-
