@@ -58,8 +58,8 @@ class Promotion(db.Model):
         logger.info(f"name={self.name}")
         logger.info(f"promotion type={PromotionType(self.promotion_type).name}")
         logger.info(f"value={self.value}")
-        logger.info(f"start_date={self.start_date.strftime("%b-%d-%Y")}")
-        logger.info(f"end_date={self.end_date.strftime("%b-%d-%Y")}")
+        logger.info(f"start_date={self.start_date.strftime('%b-%d-%Y')}")
+        logger.info(f"end_date={self.end_date.strftime('%b-%d-%Y')}")
         logger.info(f"active={self.active}")
 
         try:
@@ -99,8 +99,8 @@ class Promotion(db.Model):
             "id": self.id,
             "name": self.name,
             "promotion_type": self.promotion_type.value,
-            "start_date": self.start_date,
-            "end_date": self.end_date,
+            "start_date": self.start_date.isoformat() if self.start_date else None,
+            "end_date": self.end_date.isoformat() if self.end_date else None,
             "value": self.value,
             "active": self.active,
         }
