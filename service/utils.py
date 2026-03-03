@@ -22,7 +22,7 @@ def _parse_date(value):
         return value
     if isinstance(value, str):
         try:
-            date.fromisoformat(value)
+            return date.fromisoformat(value)
         except ValueError:
             pass
         try:

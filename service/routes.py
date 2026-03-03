@@ -25,6 +25,7 @@ from flask import jsonify, request, url_for, abort
 from flask import current_app as app  # Import Flask application
 from service.models import Promotion
 from service.common import status  # HTTP Status Codes
+from service.utils import PromotionType
 
 
 ######################################################################
@@ -42,6 +43,41 @@ def index():
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
 ######################################################################
+
+
+######################################################################
+# LIST ALL PETS
+######################################################################
+@app.route("/promotions", methods=["GET"])
+def list_promotions():
+    """Returns all of the Promotions"""
+    app.logger.info("Request for promotion list")
+
+    promotions = []
+
+    name = request.args.get("name")
+    promotion_type = request.args.get("promotion_type")
+    active = request.args.get("active")
+
+    if name:
+        app.logger.info("Find by name: %s", name)
+        promotions = Promotion.find_by_name(name)
+    elif promotion_type:
+        app.logger.info("Find by promotion_type: %s", promotion_type)
+        promotions = Promotion.find_by_promotion_type(
+            PromotionType[promotion_type.upper()]
+        )
+    elif active:
+        app.logger.info("Find by active: %s", active)
+        active_value = active.lower() in ["true", "yes", "1"]
+        promotions = Promotion.find_by_active(active_value)
+    else:
+        app.logger.info("Find all")
+        promotions = Promotion.all()
+
+    results = [promotion.serialize() for promotion in promotions]
+    app.logger.info("Returning %d promotions", len(results))
+    return jsonify(results), status.HTTP_200_OK
 
 
 ######################################################################
@@ -68,13 +104,30 @@ def create_promotions():
 
     # Return the location of the new Promotion
     # Todo: uncomment this code when get_promotions is implemented
-    # location_url = url_for("get_promotions", promotion_id=promotion.id, _external=True)
-    location_url = "unknown"
+    location_url = url_for("get_promotions", promotion_id=promotion.id, _external=True)
+    # location_url = "unknown"
     return (
         jsonify(promotion.serialize()),
         status.HTTP_201_CREATED,
         {"Location": location_url},
     )
+
+######################################################################
+# RETRIEVE A PROMOTION
+######################################################################
+@app.route("/promotions/<int:promotion_id>", methods=["GET"])
+def get_promotions(promotion_id):
+    """
+    Retrieve a single Promotion
+    This endpoint will return a Promotion based on its id
+    """
+    app.logger.info("Request to Retrieve a promotion with id [%s]", promotion_id)
+
+    promotion = Promotion.find(promotion_id)
+    if not promotion:
+        abort(status.HTTP_404_NOT_FOUND, f"Promotion with id '{promotion_id}' was not found.")
+
+    return jsonify(promotion.serialize()), status.HTTP_200_OK
 
 
 ######################################################################
