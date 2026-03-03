@@ -40,9 +40,12 @@ class Promotion(db.Model):
     # Todo: Place the rest of your schema here...
 
     def __repr__(self):
-        return ""
-
-    #   return f"<Promotion id=[{self.id}], name=[{self.name}], type=[{self.promotion_type}], start_date=[{self.start_date}], end_date=[{self.end_date}], value=[{self.value}], active=[{self.active}]>"
+        return (
+            f"<Promotion id=[{self.id}], name=[{self.name}], "
+            f"type=[{self.promotion_type.name}], start_date=[{self.start_date}], "
+            f"end_date=[{self.end_date}], value=[{self.value}], "
+            f"active=[{self.active}]>"
+        )
 
     def create(self):
         """

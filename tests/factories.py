@@ -27,4 +27,3 @@ class PromotionFactory(factory.Factory):
     # Todo: uncomment this code when active status auto-detection is implemented
     # active = fuzzy.FuzzyChoice(choices=[True, False])
     active = False
-    # Todo: Add your other attributes here...

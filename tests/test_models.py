@@ -27,6 +27,7 @@ from service.models import Promotion, DataValidationError, db
 from service.utils import PromotionType
 from .factories import PromotionFactory
 from datetime import date, timedelta
+from unittest.mock import patch
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -79,7 +80,7 @@ class TestPromotion(TestCase):
         self.assertEqual(data.name, resource.name)
 
     # Todo: Add your test cases here...
-    def test_create_a_promotion(self):
+    def test_create_promotion(self):
         """It should Create a promotion and assert that it exists"""
         promotion = Promotion(
             id=32467,
@@ -90,6 +91,7 @@ class TestPromotion(TestCase):
             value=10,
             active=False,
         )
+        promotion.create()
         # self.assertEqual(str(promotion), "<Promotion Fido id=[None]>")
         self.assertTrue(promotion is not None)
         self.assertEqual(promotion.id, 32467)
@@ -99,6 +101,19 @@ class TestPromotion(TestCase):
         self.assertEqual(promotion.end_date, date(2026, 2, 18))
         self.assertEqual(promotion.value, 10)
         self.assertEqual(promotion.active, False)
+        print(promotion)
+
+    @patch.object(db.session, "rollback")
+    @patch.object(db.session, "commit", side_effect=Exception("DB Error"))
+    def test_create_promotion_failed(self, mock_commit, mock_rollback):
+        """It should not create a Promotion when the database commit fails"""
+        promotion = PromotionFactory(
+            start_date=date.today(),
+            end_date=date.today() + timedelta(days=1),
+        )
+
+        self.assertRaises(DataValidationError, promotion.create)
+        mock_rollback.assert_called_once()
 
     def test_list_promotions(self):
         """It should list all Promotions in the database"""
