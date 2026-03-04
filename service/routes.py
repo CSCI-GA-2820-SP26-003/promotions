@@ -31,14 +31,19 @@ from service.utils import PromotionType
 ######################################################################
 # GET INDEX
 ######################################################################
-@app.route("/")
+@app.route("/", methods=["GET"])
 def index():
     """Root URL response"""
     return (
-        "Reminder: return some useful information in json format about the service here",
+        jsonify(
+            name="Promotions REST API",
+            version="1.0.0",
+            resources={
+                "promotions": url_for("list_promotions", _external=False)
+            },
+        ),
         status.HTTP_200_OK,
     )
-
 
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S

@@ -72,10 +72,32 @@ class TestPromotionService(TestCase):
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
 
+    # def test_index(self):
+        # """It should call the home page"""
+        # resp = self.client.get("/")
+        # self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
     def test_index(self):
-        """It should call the home page"""
+        """Test the root URL"""
         resp = self.client.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertTrue(resp.is_json)
+
+        data = resp.get_json()
+        self.assertIn("name", data)
+        self.assertIn("version", data)
+        self.assertIn("resources", data)
+        self.assertIn("promotions", data["resources"])
+        
+    def test_404_returns_json(self):
+        resp = self.client.get("/not_found")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertTrue(resp.is_json)
+    
+    def test_405_returns_json(self):
+        resp = self.client.put("/promotions")
+        self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertTrue(resp.is_json)
 
     ############################################################
     # Utility function to bulk create pets
