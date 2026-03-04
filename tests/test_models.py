@@ -111,6 +111,19 @@ class TestPromotion(TestCase):
         promotions = Promotion.all()
         self.assertEqual(len(promotions), 5)
 
+    ######################################################################
+    #  D E L E T E   T E S T   C A S E S
+    ######################################################################
+
+    def test_delete_a_promotion(self):
+        """It should Delete a promotion"""
+        promotion = PromotionFactory()
+        promotion.create()
+        self.assertEqual(len(Promotion.all()), 1)
+        # delete the pet and make sure it isn't in the database
+        promotion.delete()
+        self.assertEqual(len(Promotion.all()), 0)
+
 
 ######################################################################
 #  Q U E R Y   T E S T   C A S E S
