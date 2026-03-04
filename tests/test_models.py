@@ -172,6 +172,35 @@ class TestPromotion(TestCase):
 
         self.assertTrue(promo.active)
 
+    def test_deserialize_invalid_payback_percent_value(self):
+        """It should not deserialize PAYBACK_PERCENT when value is invalid"""
+        data = PromotionFactory().serialize()
+        data["promotion_type"] = PromotionType.PAYBACK_PERCENT.value
+        data["value"] = 150
+
+        with self.assertRaises(DataValidationError):
+            Promotion().deserialize(data)
+
+    def test_deserialize_valid_payback_percent_value(self):
+        """It should deserialize PAYBACK_PERCENT when value is valid"""
+        data = PromotionFactory().serialize()
+        data["promotion_type"] = PromotionType.PAYBACK_PERCENT.value
+        data["value"] = 50
+
+        promo = Promotion().deserialize(data)
+        self.assertEqual(promo.promotion_type, PromotionType.PAYBACK_PERCENT)
+        self.assertEqual(promo.value, 50)
+
+    def test_validate_negative_value(self):
+        """It should reject negative values"""
+        data = PromotionFactory().serialize()
+        data["value"] = -1
+
+        with self.assertRaises(DataValidationError) as context:
+            Promotion().deserialize(data)
+
+        self.assertIn("value cannot be negative", str(context.exception))
+
 ######################################################################
 #  U T I L S   T E S T   C A S E S
 ######################################################################
