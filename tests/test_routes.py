@@ -27,8 +27,8 @@ from wsgi import app
 from service.common import status
 from service.models import db, Promotion
 from service.utils import PromotionType, _parse_date
-from .factories import PromotionFactory
 from service.models import DataValidationError
+from .factories import PromotionFactory
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -73,9 +73,9 @@ class TestPromotionService(TestCase):
     ######################################################################
 
     # def test_index(self):
-        # """It should call the home page"""
-        # resp = self.client.get("/")
-        # self.assertEqual(resp.status_code, status.HTTP_200_OK)
+    # """It should call the home page"""
+    # resp = self.client.get("/")
+    # self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_index(self):
         """Test the root URL"""
@@ -88,13 +88,15 @@ class TestPromotionService(TestCase):
         self.assertIn("version", data)
         self.assertIn("resources", data)
         self.assertIn("promotions", data["resources"])
-        
+
     def test_404_returns_json(self):
+        """It should return a 404 not found error as JSON"""
         resp = self.client.get("/not_found")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(resp.is_json)
-    
+
     def test_405_returns_json(self):
+        """It should return a 405 method not allowed error as JSON"""
         resp = self.client.put("/promotions")
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertTrue(resp.is_json)
@@ -322,9 +324,7 @@ class TestPromotionService(TestCase):
     def test_create_promotion_invalid_json(self):
         """It should return 400 when invalid JSON is sent"""
         response = self.client.post(
-            BASE_URL,
-            data="invalid json",
-            content_type="application/json"
+            BASE_URL, data="invalid json", content_type="application/json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

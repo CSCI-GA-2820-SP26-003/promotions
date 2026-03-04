@@ -4,11 +4,12 @@ Models for Promotion
 All of the models are stored in this module
 """
 
+from datetime import date
 import logging
 from flask_sqlalchemy import SQLAlchemy
-from datetime import date
-from .utils import PromotionType, _parse_date
+
 from service.utils import validate_promotion_value
+from .utils import PromotionType, _parse_date
 
 logger = logging.getLogger("flask.app")
 
@@ -32,12 +33,9 @@ class Promotion(db.Model):
     name = db.Column(db.String(63))
     promotion_type = db.Column(db.Enum(PromotionType))
     start_date = db.Column(db.Date())
-    # <class 'datetime.date'>
     end_date = db.Column(db.Date())
     value = db.Column(db.Integer)
     active = db.Column(db.Boolean, default=True, nullable=False)
-
-    # Todo: Place the rest of your schema here...
 
     def __repr__(self):
         return (
@@ -51,19 +49,15 @@ class Promotion(db.Model):
         """
         Creates a Promotion to the database
         """
-        self.active = (
-            True
-            if (date.today() >= self.start_date and date.today() <= self.end_date)
-            else False
-        )
+        self.active = self.start_date <= date.today() <= self.end_date
         logger.info("Creating Promotion")
-        logger.info(f"ID={self.id}")
-        logger.info(f"name={self.name}")
-        logger.info(f"promotion type={PromotionType(self.promotion_type).name}")
-        logger.info(f"value={self.value}")
-        logger.info(f"start_date={self.start_date.strftime('%b-%d-%Y')}")
-        logger.info(f"end_date={self.end_date.strftime('%b-%d-%Y')}")
-        logger.info(f"active={self.active}")
+        logger.info("ID=%s", self.id)
+        logger.info("name=%s", self.name)
+        logger.info("promotion type=%s", PromotionType(self.promotion_type).name)
+        logger.info("value=%s", self.value)
+        logger.info("start_date=%s", self.start_date.strftime("%b-%d-%Y"))
+        logger.info("end_date=%s", self.end_date.strftime("%b-%d-%Y"))
+        logger.info("active=%s", self.active)
 
         try:
             db.session.add(self)
@@ -77,11 +71,7 @@ class Promotion(db.Model):
         """
         Updates a Promotion to the database
         """
-        self.active = (
-            True
-            if (date.today() >= self.start_date and date.today() <= self.end_date)
-            else False
-        )
+        self.active = self.start_date <= date.today() <= self.end_date
         logger.info("Saving %s", self.name)
         try:
             db.session.commit()

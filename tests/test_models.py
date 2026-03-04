@@ -21,14 +21,17 @@ Test cases for Promotion Model
 # pylint: disable=duplicate-code
 import os
 import logging
+
+from datetime import date, timedelta
 from unittest import TestCase
+from unittest.mock import patch
+import pytest
+
 from wsgi import app
 from service.models import Promotion, DataValidationError, db
 from service.utils import PromotionType, _parse_date
 from .factories import PromotionFactory
-from datetime import date, timedelta
-from unittest.mock import patch
-import pytest
+
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -69,18 +72,6 @@ class TestPromotion(TestCase):
     #  T E S T   C A S E S
     ######################################################################
 
-    def test_example_replace_this(self):
-        """It should create a Promotion"""
-        # Todo: Remove this test case example
-        resource = PromotionFactory()
-        resource.create()
-        self.assertIsNotNone(resource.id)
-        found = Promotion.all()
-        self.assertEqual(len(found), 1)
-        data = Promotion.find(resource.id)
-        self.assertEqual(data.name, resource.name)
-
-    # Todo: Add your test cases here...
     def test_create_promotion(self):
         """It should Create a promotion and assert that it exists"""
         promotion = Promotion(
@@ -110,6 +101,7 @@ class TestPromotion(TestCase):
         """It should not create a Promotion when the database commit fails"""
         promotion = PromotionFactory()
         self.assertRaises(DataValidationError, promotion.create)
+        mock_commit.assert_called_once()
         mock_rollback.assert_called_once()
 
     def test_deserialize_missing_attribute(self):
@@ -161,10 +153,7 @@ class TestPromotion(TestCase):
     ######################################################################
     def test_update_sets_active_status(self):
         """It should automatically set active status when updating a Promotion"""
-        promo = PromotionFactory(
-            start_date=date.today(),
-            end_date=date.today()
-        )
+        promo = PromotionFactory(start_date=date.today(), end_date=date.today())
         promo.create()
 
         promo.update()
@@ -200,9 +189,9 @@ class TestPromotion(TestCase):
 
         self.assertIn("value cannot be negative", str(context.exception))
 
-######################################################################
-#  U T I L S   T E S T   C A S E S
-######################################################################
+    ######################################################################
+    #  U T I L S   T E S T   C A S E S
+    ######################################################################
 
     def test_parse_date_valid_values(self):
         """It should parse strings and convert into date type"""
