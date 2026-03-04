@@ -112,6 +112,7 @@ def create_promotions():
         {"Location": location_url},
     )
 
+
 ######################################################################
 # RETRIEVE A PROMOTION
 ######################################################################
@@ -125,7 +126,10 @@ def get_promotions(promotion_id):
 
     promotion = Promotion.find(promotion_id)
     if not promotion:
-        abort(status.HTTP_404_NOT_FOUND, f"Promotion with id '{promotion_id}' was not found.")
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Promotion with id '{promotion_id}' was not found.",
+        )
 
     return jsonify(promotion.serialize()), status.HTTP_200_OK
 

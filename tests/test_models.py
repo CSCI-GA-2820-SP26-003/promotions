@@ -100,16 +100,6 @@ class TestPromotion(TestCase):
         self.assertEqual(promotion.value, 10)
         self.assertEqual(promotion.active, False)
 
-<<<<<<< HEAD
-    def test_delete_a_promotion(self):
-        """It should Delete a promotion"""
-        promotion = PromotionFactory()
-        promotion.create()
-        self.assertEqual(len(Promotion.all()), 1)
-        # delete the pet and make sure it isn't in the database
-        promotion.delete()
-        self.assertEqual(len(Promotion.all()), 0)
-=======
     def test_list_promotions(self):
         """It should list all Promotions in the database"""
         promotions = Promotion.all()
@@ -120,6 +110,19 @@ class TestPromotion(TestCase):
         # See if we get back 5 promotions
         promotions = Promotion.all()
         self.assertEqual(len(promotions), 5)
+
+    ######################################################################
+    #  D E L E T E   T E S T   C A S E S
+    ######################################################################
+
+    def test_delete_a_promotion(self):
+        """It should Delete a promotion"""
+        promotion = PromotionFactory()
+        promotion.create()
+        self.assertEqual(len(Promotion.all()), 1)
+        # delete the pet and make sure it isn't in the database
+        promotion.delete()
+        self.assertEqual(len(Promotion.all()), 0)
 
 
 ######################################################################
@@ -196,4 +199,3 @@ class TestModelQueries(TestPromotion):
         self.assertEqual(found.count(), count)
         for promotion in found:
             self.assertEqual(promotion.promotion_type, promotion_type)
->>>>>>> origin/master
