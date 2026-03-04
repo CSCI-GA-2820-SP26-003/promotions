@@ -77,6 +77,11 @@ class Promotion(db.Model):
         """
         Updates a Promotion to the database
         """
+        self.active = (
+            True
+            if (date.today() >= self.start_date and date.today() <= self.end_date)
+            else False
+        )
         logger.info("Saving %s", self.name)
         try:
             db.session.commit()

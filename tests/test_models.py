@@ -160,6 +160,18 @@ class TestPromotion(TestCase):
         promotions = Promotion.all()
         self.assertEqual(len(promotions), 5)
 
+    def test_update_sets_active_status(self):
+        """It should automatically set active status when updating a Promotion"""
+        promo = PromotionFactory(
+            start_date=date.today(),
+            end_date=date.today()
+        )
+        promo.create()
+
+        promo.update()
+
+        self.assertTrue(promo.active)
+
 ######################################################################
 #  U T I L S   T E S T   C A S E S
 ######################################################################

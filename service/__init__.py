@@ -46,10 +46,10 @@ def create_app():
 
         try:
             db.create_all()
-        except Exception as error:  # pylint: disable=broad-except
-            app.logger.critical("%s: Cannot continue", error)
+        except Exception as error:  # pylint: disable=broad-except  # pragma: no cover
+            app.logger.critical("%s: Cannot continue", error)  # pragma: no cover
             # gunicorn requires exit code 4 to stop spawning workers when they die
-            sys.exit(4)
+            sys.exit(4)  # pragma: no cover
 
         # Set up logging for production
         log_handlers.init_logging(app, "gunicorn.error")

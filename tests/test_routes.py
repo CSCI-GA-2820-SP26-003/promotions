@@ -28,6 +28,7 @@ from service.common import status
 from service.models import db, Promotion
 from service.utils import PromotionType, _parse_date
 from .factories import PromotionFactory
+from service.models import DataValidationError
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -285,3 +286,63 @@ class TestPromotionService(TestCase):
         data = response.get_json()
         self.assertEqual(data["id"], promotion_id)
         self.assertEqual(data["name"], test_promo.name)
+
+    def test_create_promotion_bad_data(self):
+        """It should return 400 when bad data is sent"""
+        response = self.client.post(BASE_URL, json={})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_promotion_no_json(self):
+        """It should return 415 when no JSON is sent"""
+        response = self.client.post(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+    def test_create_promotion_invalid_json(self):
+        """It should return 400 when invalid JSON is sent"""
+        response = self.client.post(
+            BASE_URL,
+            data="invalid json",
+            content_type="application/json"
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_query_invalid_active_value(self):
+        """It should handle invalid active query values"""
+        response = self.client.get(BASE_URL, query_string="active=notabool")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_serialize_promotion(self):
+        """It should serialize a Promotion"""
+        promo = PromotionFactory()
+        data = promo.serialize()
+
+        self.assertEqual(data["name"], promo.name)
+        self.assertEqual(data["promotion_type"], promo.promotion_type.value)
+        self.assertEqual(data["value"], promo.value)
+        self.assertEqual(data["active"], promo.active)
+
+    def test_update_promotion(self):
+        """It should update a Promotion"""
+        promo = PromotionFactory()
+        promo.create()
+
+        promo.name = "Updated Promotion"
+        promo.update()
+
+        found = Promotion.find(promo.id)
+        self.assertEqual(found.name, "Updated Promotion")
+
+    def test_deserialize_invalid_type(self):
+        """It should raise DataValidationError when deserialize is given wrong type"""
+        with self.assertRaises(DataValidationError):
+            Promotion().deserialize("this is not a dict")
+
+    def test_query_invalid_promotion_type(self):
+        """It should raise KeyError for invalid promotion_type query"""
+        with self.assertRaises(KeyError):
+            self.client.get(BASE_URL, query_string="promotion_type=INVALID_TYPE")
+
+    def test_find_promotion_not_found(self):
+        """It should return None when promotion is not found"""
+        result = Promotion.find(999999)
+        self.assertIsNone(result)
