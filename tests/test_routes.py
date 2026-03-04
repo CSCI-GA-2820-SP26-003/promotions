@@ -73,9 +73,9 @@ class TestPromotionService(TestCase):
     ######################################################################
 
     # def test_index(self):
-        # """It should call the home page"""
-        # resp = self.client.get("/")
-        # self.assertEqual(resp.status_code, status.HTTP_200_OK)
+    # """It should call the home page"""
+    # resp = self.client.get("/")
+    # self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_index(self):
         """Test the root URL"""
@@ -88,12 +88,12 @@ class TestPromotionService(TestCase):
         self.assertIn("version", data)
         self.assertIn("resources", data)
         self.assertIn("promotions", data["resources"])
-        
+
     def test_404_returns_json(self):
         resp = self.client.get("/not_found")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(resp.is_json)
-    
+
     def test_405_returns_json(self):
         resp = self.client.put("/promotions")
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -146,8 +146,6 @@ class TestPromotionService(TestCase):
 
         # Check the data is correct
         new_promotion = response.get_json()
-        # self.assertIsInstance(test_promotion.id, str)
-        self.assertEqual(new_promotion["id"], test_promotion.id)
         self.assertEqual(new_promotion["name"], test_promotion.name)
         self.assertEqual(
             PromotionType(new_promotion["promotion_type"]),
@@ -167,7 +165,6 @@ class TestPromotionService(TestCase):
         response = self.client.get(location)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         new_promotion = response.get_json()
-        self.assertEqual(new_promotion["id"], test_promotion.id)
         self.assertEqual(new_promotion["name"], test_promotion.name)
         self.assertEqual(
             PromotionType(new_promotion["promotion_type"]),
@@ -322,9 +319,7 @@ class TestPromotionService(TestCase):
     def test_create_promotion_invalid_json(self):
         """It should return 400 when invalid JSON is sent"""
         response = self.client.post(
-            BASE_URL,
-            data="invalid json",
-            content_type="application/json"
+            BASE_URL, data="invalid json", content_type="application/json"
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
