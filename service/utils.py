@@ -28,9 +28,5 @@ def _parse_date(value):
         try:
             return parsedate_to_datetime(value).date()
         except Exception as error:
-            raise DataValidationError("Invalid date string: " + value) from error
-    raise DataValidationError("Invalid date type: " + str(type(value)))
-
-
-class DataValidationError(Exception):
-    """Used for an data validation errors when deserializing"""
+            raise ValueError("Invalid date string: " + value) from error
+    raise TypeError("Invalid date type: " + str(type(value)))

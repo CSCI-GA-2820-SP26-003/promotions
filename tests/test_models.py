@@ -24,10 +24,11 @@ import logging
 from unittest import TestCase
 from wsgi import app
 from service.models import Promotion, DataValidationError, db
-from service.utils import PromotionType
+from service.utils import PromotionType, _parse_date
 from .factories import PromotionFactory
 from datetime import date, timedelta
 from unittest.mock import patch
+import pytest
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -125,6 +126,23 @@ class TestPromotion(TestCase):
         # See if we get back 5 promotions
         promotions = Promotion.all()
         self.assertEqual(len(promotions), 5)
+
+    # TEST utils.py
+    def test_parse_date_valid_values(self):
+        """It should parse strings and convert into date type"""
+        assert _parse_date(None) is None
+        d = date(2026, 3, 3)
+        assert _parse_date(d) is d
+        assert _parse_date("2026-03-03") == date(2026, 3, 3)
+        assert _parse_date("Tue, 19 Jan 1999 07:12:08 +0900") == date(1999, 1, 19)
+
+    def test_parse_date_invalid_string(self):
+        with pytest.raises(ValueError):
+            _parse_date("random string")
+
+    def test_parse_date_invalid_type(self):
+        with pytest.raises(TypeError, match="Invalid date type:"):
+            _parse_date(990119)
 
 
 ######################################################################
