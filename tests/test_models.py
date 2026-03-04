@@ -100,11 +100,7 @@ class TestPromotion(TestCase):
     @patch.object(db.session, "commit", side_effect=Exception("DB Error"))
     def test_create_promotion_failed(self, mock_commit, mock_rollback):
         """It should not create a Promotion when the database commit fails"""
-        promotion = PromotionFactory(
-            start_date=date.today(),
-            end_date=date.today() + timedelta(days=1),
-        )
-
+        promotion = PromotionFactory()
         self.assertRaises(DataValidationError, promotion.create)
         mock_rollback.assert_called_once()
 
@@ -240,6 +236,15 @@ class TestPromotion(TestCase):
         """It should not parse a non string type to convert into a date"""
         with pytest.raises(TypeError, match="Invalid date type:"):
             _parse_date(990119)
+
+    @patch.object(db.session, "rollback")
+    @patch.object(db.session, "delete", side_effect=Exception("DB Error"))
+    def test_delete_promotion_failed(self, mock_delete, mock_rollback):
+        """It should not delete a Promotion when the database delete fails"""
+        promotion = PromotionFactory()
+        self.assertRaises(DataValidationError, promotion.delete)
+        mock_delete.assert_called_once_with(promotion)
+        mock_rollback.assert_called_once()
 
 
 ######################################################################

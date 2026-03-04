@@ -1,37 +1,28 @@
-# NYU DevOps Project Template
+# NYU DevOps Project : Promotions
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python](https://img.shields.io/badge/Language-Python-blue.svg)](https://python.org/)
+[![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://python.org/)
+[![Flask](https://img.shields.io/badge/Framework-Flask-lightgrey.svg)](https://flask.palletsprojects.com/)
 
-This is a skeleton you can use to start your projects.
+# Promotions Service
 
-**Note:** _Feel free to overwrite this `README.md` file with the one that describes your project._
+The Promotions Service is a RESTful web service for creating and managing retail promotions. It stores promotion metadata in a PostgreSQL database and exposes endpoints to create, retrieve, list, filter, and delete promotions. Promotions support multiple business rules such as percentage discounts, fixed discounts, free shipping, and buy-n-get-one offers.
 
 ## Overview
 
-This project template contains starter code for your class project. The `/service` folder contains your `models.py` file for your model and a `routes.py` file for your service. The `/tests` folder has test case starter code for testing the model and the service separately. All you need to do is add your functionality. You can use the [lab-flask-tdd](https://github.com/nyu-devops/lab-flask-tdd) for code examples to copy from.
+This project is built with Flask and Flask-SQLAlchemy and follows a service-oriented layout with separate modules for configuration, models, routes, utilities, and tests.
 
-## Automatic Setup
+Each promotion includes:
 
-The best way to use this repo is to start your own repo using it as a git template. To do this just press the green **Use this template** button in GitHub and this will become the source for your repository.
+- `id`: unique identifier
+- `name`: name of the promotion
+- `promotion_type`: one of the supported promotion categories: `PERCENT_OFF`, `BUY_N_GET_ONE`, `FIXED_DISCOUNT`, `FREE_SHIPPING`
+- `start_date`: date the promotion becomes valid
+- `end_date`: date the promotion expires
+- `value`: numeric value associated with the promotion type
+- `active`: boolean status indicating whether the promotion is currently active
 
-## Manual Setup
-
-You can also clone this repository and then copy and paste the starter code into your project repo folder on your local computer. Be careful not to copy over your own `README.md` file so be selective in what you copy.
-
-There are 4 hidden files that you will need to copy manually if you use the Mac Finder or Windows Explorer to copy files from this folder into your repo folder.
-
-These should be copied using a bash shell as follows:
-
-```bash
-    cp .gitignore  ../<your_repo_folder>/
-    cp .flaskenv ../<your_repo_folder>/
-    cp .gitattributes ../<your_repo_folder>/
-```
-
-## Contents
-
-The project contains the following:
+## Project Structure
 
 ```text
 .gitignore          - this will ignore vagrant and other metadata files
@@ -46,6 +37,7 @@ service/                   - service python package
 ├── config.py              - configuration parameters
 ├── models.py              - module with business models
 ├── routes.py              - module with service routes
+├── utils.py               - utilities for models.py and routes.py
 └── common                 - common code package
     ├── cli_commands.py    - Flask command to recreate all tables
     ├── error_handlers.py  - HTTP error handling code
@@ -59,6 +51,54 @@ tests/                     - test cases package
 ├── test_models.py         - test suite for business models
 └── test_routes.py         - test suite for service routes
 ```
+
+## Tech Stack
+
+- Python 3.12
+- Flask 3.1
+- Flask-SQLAlchemy 3.1
+- PostgreSQL with `psycopg`
+
+
+## API Endpoints
+
+| Method   | Endpoint                     | Description                    |
+| -------- | ---------------------------- | ------------------------------ |
+| `GET`    | `/`                          | Root |
+| `POST`   | `/promotions`                | Create a new promotion         |
+| `GET`    | `/promotions`                | List all promotions            |
+| `GET`    | `/promotions/<promotion_id>` | Retrieve a promotion by ID     |
+| `PUT`    | `/promotions/<promotion_id>` | Update a promotion by ID       |
+| `DELETE` | `/promotions/<promotion_id>` | Delete a promotion by ID       |
+
+
+
+### Query parameters
+
+The list endpoint supports filtering with query parameters:
+
+- `id`
+- `name`
+- `promotion_type`
+- `active`
+
+
+## Testing
+
+Run the full test suite with:
+
+```bash
+make test
+```
+
+
+## Authors
+
+- Jason Chen
+- Gustave Martinez
+- Amy Kim
+- Esha Pandey
+- Curie Yoon
 
 ## License
 
