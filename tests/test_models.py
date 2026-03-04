@@ -117,6 +117,7 @@ class TestPromotion(TestCase):
         mock_rollback.assert_called_once()
 
     def test_deserialize_missing_attribute(self):
+        """It should not deserialize if the data is missing"""
         promotion = PromotionFactory().serialize()
         del promotion["end_date"]
 
@@ -169,10 +170,12 @@ class TestPromotion(TestCase):
         assert _parse_date("Tue, 19 Jan 1999 07:12:08 +0900") == date(1999, 1, 19)
 
     def test_parse_date_invalid_string(self):
+        """It should not parse a non-ISO date format string into a date"""
         with pytest.raises(ValueError):
             _parse_date("random string")
 
     def test_parse_date_invalid_type(self):
+        """It should not parse a non string type to convert into a date"""
         with pytest.raises(TypeError, match="Invalid date type:"):
             _parse_date(990119)
 
