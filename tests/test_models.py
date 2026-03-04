@@ -36,10 +36,10 @@ DATABASE_URI = os.getenv(
 
 
 ######################################################################
-#  Promotion   M O D E L   T E S T   C A S E S
+#  B A S E   T E S T   C A S E S
 ######################################################################
 # pylint: disable=too-many-public-methods
-class TestPromotion(TestCase):
+class TestCaseBase(TestCase):
     """Test Cases for Promotion Model"""
 
     @classmethod
@@ -65,18 +65,20 @@ class TestPromotion(TestCase):
         """This runs after each test"""
         db.session.remove()
 
-    ######################################################################
-    #  T E S T   C A S E S
-    ######################################################################
+######################################################################
+#  Promotion   M O D E L T E S T   C A S E S
+######################################################################
 
+class TestPetModel(TestCaseBase):
+    """Pet Model CRUD Tests"""
     # ----------------------------------------------------------
     # TEST CREATE
     # ----------------------------------------------------------
-
+    # Todo: Add your test cases here...
     def test_create_promotion(self):
         """It should Create a promotion and assert that it exists"""
         promotion = Promotion(
-            id=32467,
+            # id=32467,
             name="Free Shipping for New Members",
             promotion_type=PromotionType.FREE_SHIPPING,
             start_date=date(2026, 1, 19),
@@ -84,10 +86,10 @@ class TestPromotion(TestCase):
             value=10,
             active=False,
         )
-        promotion.create()
+        # promotion.create()
         # self.assertEqual(str(promotion), "<Promotion Fido id=[None]>")
         self.assertTrue(promotion is not None)
-        self.assertEqual(promotion.id, 32467)
+        self.assertEqual(promotion.id, None)
         self.assertEqual(promotion.name, "Free Shipping for New Members")
         self.assertEqual(promotion.promotion_type, PromotionType.FREE_SHIPPING)
         self.assertEqual(promotion.start_date, date(2026, 1, 19))
@@ -95,6 +97,43 @@ class TestPromotion(TestCase):
         self.assertEqual(promotion.value, 10)
         self.assertEqual(promotion.active, False)
         print(promotion)
+
+    def test_add_a_promotion(self):
+        """It should Create a promotion and add it to the database"""
+        promotions = Promotion.all()
+        self.assertEqual(promotions, [])
+        promotion = Promotion(
+            name="Free Shipping for New Members",
+            promotion_type=PromotionType.FREE_SHIPPING,
+            start_date=date(2026, 1, 19),
+            end_date=date(2026, 2, 18),
+            value=10,
+            active=False,
+        )
+        self.assertTrue(promotion is not None)
+        self.assertEqual(promotion.id, None)
+        promotion.create()
+        # Assert that it was assigned an id and shows up in the database
+        self.assertIsNotNone(promotion.id)
+        promotions = Promotion.all()
+        self.assertEqual(len(promotions), 1)
+
+    def test_read_a_promotion(self):
+        """It should Read a Pet"""
+        promotion = PromotionFactory()
+        logging.debug(promotion)
+        promotion.id = None
+        promotion.create()
+        self.assertIsNotNone(promotion.id)
+        # Fetch it back
+        found_promotion = Promotion.find(promotion.id)
+        self.assertEqual(found_promotion.id, promotion.id)
+        self.assertEqual(found_promotion.name, promotion.name)
+        self.assertEqual(found_promotion.promotion_type, promotion.promotion_type)
+        self.assertEqual(found_promotion.start_date, promotion.start_date)
+        self.assertEqual(found_promotion.end_date, promotion.end_date)
+        self.assertEqual(found_promotion.value, promotion.value)
+        self.assertEqual(found_promotion.active, promotion.active)
 
     @patch.object(db.session, "rollback")
     @patch.object(db.session, "commit", side_effect=Exception("DB Error"))
@@ -186,6 +225,19 @@ class TestPromotion(TestCase):
         )
         self.assertIsInstance(context.exception.__cause__, TypeError)
 
+
+    ######################################################################
+    #  U T I L S   T E S T   C A S E S
+    ######################################################################
+    def test_update_sets_active_status(self):
+        """It should automatically set active status when updating a Promotion"""
+        promo = PromotionFactory(start_date=date.today(), end_date=date.today())
+        promo.create()
+
+        promo.update()
+
+        self.assertTrue(promo.active)
+
     def test_deserialize_invalid_payback_percent_value(self):
         """It should not deserialize PAYBACK_PERCENT when value is invalid"""
         data = PromotionFactory().serialize()
@@ -248,10 +300,56 @@ class TestPromotion(TestCase):
 
 
 ######################################################################
+#  T E S T   E X C E P T I O N   H A N D L E R S
+######################################################################
+class TestExceptionHandlers(TestCaseBase):
+    """Pet Model Exception Handlers"""
+
+    @patch("service.models.db.session.commit")
+    def test_create_exception(self, exception_mock):
+        """It should catch a create exception"""
+        exception_mock.side_effect = Exception()
+        promotion = PromotionFactory()
+        self.assertRaises(DataValidationError, promotion.create)
+
+    @patch("service.models.db.session.commit")
+    def test_update_exception(self, exception_mock):
+        """It should catch a update exception"""
+        exception_mock.side_effect = Exception()
+        promotion = PromotionFactory()
+        self.assertRaises(DataValidationError, promotion.update)
+
+    @patch("service.models.db.session.commit")
+    def test_delete_exception(self, exception_mock):
+        """It should catch a delete exception"""
+        exception_mock.side_effect = Exception()
+        promotion = PromotionFactory()
+        self.assertRaises(DataValidationError, promotion.delete)
+
+
+######################################################################
 #  Q U E R Y   T E S T   C A S E S
 ######################################################################
-class TestModelQueries(TestPromotion):
+class TestModelQueries(TestCaseBase):
     """Promotion Model Query Tests"""
+
+    def test_find_pet(self):
+        """It should Find a Promotion by ID"""
+        promotions = PromotionFactory.create_batch(5)
+        for promotion in promotions:
+            promotion.create()
+        logging.debug(promotions)
+        # make sure they got saved
+        self.assertEqual(len(Promotion.all()), 5)
+        # find the 2nd pet in the list
+        promotion = Promotion.find(promotions[1].id)
+        self.assertIsNot(promotion, None)
+        self.assertEqual(promotion.id, promotions[1].id)
+        self.assertEqual(promotion.name, promotions[1].name)
+        self.assertEqual(promotion.active, promotions[1].active)
+        self.assertEqual(promotion.start_date, promotions[1].start_date)
+        self.assertEqual(promotion.end_date, promotions[1].end_date)
+        self.assertEqual(promotion.promotion_type, promotions[1].promotion_type)
 
     def test_find_by_name(self):
         """It should Find a Promotion by Name"""
