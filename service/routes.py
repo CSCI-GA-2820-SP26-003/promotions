@@ -133,6 +133,35 @@ def get_promotions(promotion_id):
 
     return jsonify(promotion.serialize()), status.HTTP_200_OK
 
+######################################################################
+# UPDATE AN EXISTING PROMOTION
+######################################################################d
+@app.route("/promotions/<int:promotion_id>", methods=["PUT"])
+def update_promotions(promotion_id):
+    """
+    Update a Promotion
+    This endpoint will update a Promotion based the id specified in the path
+    """
+    app.logger.info("Request to Update a promotion with id [%s]", promotion_id)
+    check_content_type("application/json")
+
+    promotion = Promotion.find(promotion_id)
+    if not promotion:
+        abort(
+            status.HTTP_404_NOT_FOUND,
+            f"Promotion with id '{promotion_id}' was not found.",
+        )
+
+    data = request.get_json()
+    app.logger.info("Processing: %s", data)
+
+    # ID cannot be changed
+    data["id"] = promotion_id
+
+    promotion.deserialize(data)
+    promotion.update()
+
+    return jsonify(promotion.serialize()), status.HTTP_200_OK
 
 ######################################################################
 # Checks the ContentType of a request

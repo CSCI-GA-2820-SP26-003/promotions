@@ -346,3 +346,32 @@ class TestPromotionService(TestCase):
         """It should return None when promotion is not found"""
         result = Promotion.find(999999)
         self.assertIsNone(result)
+
+    def test_update_promotion(self):
+        """It should update a Promotion"""
+        # create a promotion
+        test_promo = PromotionFactory()
+        response = self.client.post(BASE_URL, json=test_promo.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        promo_id = response.get_json()["id"]
+
+        # update payload (change a couple fields)
+        update_data = test_promo.serialize()
+        update_data["id"] = 999999  # should be ignored/overridden by route
+        update_data["name"] = "Updated Promo Name"
+        update_data["value"] = 25
+
+        response = self.client.put(f"{BASE_URL}/{promo_id}", json=update_data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.get_json()
+        self.assertEqual(data["id"], promo_id)  # id must not change
+        self.assertEqual(data["name"], "Updated Promo Name")
+        self.assertEqual(data["value"], 25)
+
+    def test_update_promotion_not_found(self):
+        """It should return 404 when updating a promotion that does not exist"""
+        test_promo = PromotionFactory().serialize()
+        response = self.client.put(f"{BASE_URL}/999999", json=test_promo)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
