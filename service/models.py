@@ -122,7 +122,7 @@ class Promotion(db.Model):
         """
 
         try:
-            self.id = data["id"]
+            # self.id = data["id"]
             self.name = data["name"]
             self.promotion_type = PromotionType(data["promotion_type"])
             self.start_date = _parse_date(data["start_date"])
