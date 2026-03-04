@@ -38,12 +38,11 @@ def index():
         jsonify(
             name="Promotions REST API",
             version="1.0.0",
-            resources={
-                "promotions": url_for("list_promotions", _external=False)
-            },
+            resources={"promotions": url_for("list_promotions", _external=False)},
         ),
         status.HTTP_200_OK,
     )
+
 
 ######################################################################
 #  R E S T   A P I   E N D P O I N T S
@@ -108,9 +107,8 @@ def create_promotions():
     app.logger.info("Promotion with new id [%s] saved!", promotion.id)
 
     # Return the location of the new Promotion
-    # Todo: uncomment this code when get_promotions is implemented
     location_url = url_for("get_promotions", promotion_id=promotion.id, _external=True)
-    # location_url = "unknown"
+
     return (
         jsonify(promotion.serialize()),
         status.HTTP_201_CREATED,

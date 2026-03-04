@@ -164,7 +164,7 @@ class TestPromotionService(TestCase):
         self.assertEqual(new_promotion["value"], test_promotion.value)
         self.assertEqual(new_promotion["active"], test_promotion.active)
 
-        # Todo: uncomment this code when get_promotions is implemented
+        # uncomment this code when get_promotions is implemented
         # Check that the location header was correct
         response = self.client.get(location)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

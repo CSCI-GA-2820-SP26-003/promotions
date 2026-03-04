@@ -24,6 +24,6 @@ class PromotionFactory(factory.Factory):
     # Temporarily only creating expired promotions
     start_date = fuzzy.FuzzyDate(date(2020, 1, 1), date.today() - timedelta(days=1))
     end_date = fuzzy.FuzzyDate(date(2020, 1, 1), date.today() - timedelta(days=1))
-    # Todo: uncomment this code when active status auto-detection is implemented
+    # uncomment this code when active status auto-detection is implemented
     # active = fuzzy.FuzzyChoice(choices=[True, False])
     active = False
