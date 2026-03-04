@@ -120,7 +120,6 @@ class TestPromotionService(TestCase):
         # Make sure location header is set
         location = response.headers.get("Location", None)
         self.assertIsNotNone(location)
-        
 
         # Check the data is correct
         new_promotion = response.get_json()
@@ -161,12 +160,32 @@ class TestPromotionService(TestCase):
         self.assertEqual(new_promotion["active"], test_promotion.active)
 
     # ----------------------------------------------------------
-    # TEST UPDATE
-    # ----------------------------------------------------------
-
-    # ----------------------------------------------------------
     # TEST DELETE
     # ----------------------------------------------------------
+    def test_delete_promotion(self):
+        """It should Delete a Promotion"""
+        # create a new promotion
+        test_promotion = PromotionFactory()
+        logging.debug("Test Promotion: %s", test_promotion.serialize())
+        response = self.client.post(BASE_URL, json=test_promotion.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # get the promotion id
+        new_promotion = response.get_json()
+        new_promotion_id = new_promotion["id"]
+
+        response = self.client.delete(f"{BASE_URL}/{new_promotion_id}")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        self.assertEqual(len(response.data), 0)
+        response = self.client.get(f"{BASE_URL}/{new_promotion_id}")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_non_existing_promotion(self):
+        """It should Delete a Promotion even if it doesn't exist"""
+        response = self.client.delete(f"{BASE_URL}/0")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(response.data), 0)
 
     # ----------------------------------------------------------
     # TEST QUERY
@@ -241,8 +260,7 @@ class TestPromotionService(TestCase):
         # check the data just to be sure
         for promotion in data:
             self.assertEqual(promotion["active"], False)
-    
-    
+
     # ----------------------------------------------------------
     # TEST RETRIEVE
     # ----------------------------------------------------------
@@ -250,7 +268,7 @@ class TestPromotionService(TestCase):
         """It should return 404 when promotion is not found"""
         response = self.client.get(f"{BASE_URL}/999999")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-    
+
     def test_get_promotion(self):
         """It should Retrieve a Promotion"""
 
@@ -267,5 +285,3 @@ class TestPromotionService(TestCase):
         data = response.get_json()
         self.assertEqual(data["id"], promotion_id)
         self.assertEqual(data["name"], test_promo.name)
-    
-

@@ -160,7 +160,10 @@ class TestPromotion(TestCase):
         promotions = Promotion.all()
         self.assertEqual(len(promotions), 5)
 
-    # TEST utils.py
+######################################################################
+#  U T I L S   T E S T   C A S E S
+######################################################################
+
     def test_parse_date_valid_values(self):
         """It should parse strings and convert into date type"""
         assert _parse_date(None) is None
@@ -178,6 +181,19 @@ class TestPromotion(TestCase):
         """It should not parse a non string type to convert into a date"""
         with pytest.raises(TypeError, match="Invalid date type:"):
             _parse_date(990119)
+            
+######################################################################
+#  D E L E T E   T E S T   C A S E S
+######################################################################
+
+    def test_delete_a_promotion(self):
+        """It should Delete a promotion"""
+        promotion = PromotionFactory()
+        promotion.create()
+        self.assertEqual(len(Promotion.all()), 1)
+        # delete the pet and make sure it isn't in the database
+        promotion.delete()
+        self.assertEqual(len(Promotion.all()), 0)
 
 
 ######################################################################
