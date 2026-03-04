@@ -24,9 +24,11 @@ import logging
 from unittest import TestCase
 from wsgi import app
 from service.models import Promotion, DataValidationError, db
-from service.utils import PromotionType
+from service.utils import PromotionType, _parse_date
 from .factories import PromotionFactory
 from datetime import date, timedelta
+from unittest.mock import patch
+import pytest
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -79,7 +81,7 @@ class TestPromotion(TestCase):
         self.assertEqual(data.name, resource.name)
 
     # Todo: Add your test cases here...
-    def test_create_a_promotion(self):
+    def test_create_promotion(self):
         """It should Create a promotion and assert that it exists"""
         promotion = Promotion(
             id=32467,
@@ -90,6 +92,7 @@ class TestPromotion(TestCase):
             value=10,
             active=False,
         )
+        promotion.create()
         # self.assertEqual(str(promotion), "<Promotion Fido id=[None]>")
         self.assertTrue(promotion is not None)
         self.assertEqual(promotion.id, 32467)
@@ -99,6 +102,52 @@ class TestPromotion(TestCase):
         self.assertEqual(promotion.end_date, date(2026, 2, 18))
         self.assertEqual(promotion.value, 10)
         self.assertEqual(promotion.active, False)
+        print(promotion)
+
+    @patch.object(db.session, "rollback")
+    @patch.object(db.session, "commit", side_effect=Exception("DB Error"))
+    def test_create_promotion_failed(self, mock_commit, mock_rollback):
+        """It should not create a Promotion when the database commit fails"""
+        promotion = PromotionFactory(
+            start_date=date.today(),
+            end_date=date.today() + timedelta(days=1),
+        )
+
+        self.assertRaises(DataValidationError, promotion.create)
+        mock_rollback.assert_called_once()
+
+    def test_deserialize_missing_attribute(self):
+        """It should not deserialize if the data is missing"""
+        promotion = PromotionFactory().serialize()
+        del promotion["end_date"]
+
+        with self.assertRaises(DataValidationError) as context:
+            Promotion().deserialize(promotion)
+
+        self.assertIn("missing end_date", str(context.exception))
+        self.assertIsInstance(context.exception.__cause__, KeyError)
+
+    def test_deserialize_invalid_enum(self):
+        """It should not deserialize the data if PromotionType enum is invalid"""
+        promotion = PromotionFactory().serialize()
+        promotion["promotion_type"] = len(PromotionType) + 1
+        with pytest.raises(DataValidationError) as error:
+            Promotion().deserialize(promotion)
+        assert "Invalid Promotion: invalid value" in str(error.value)
+
+    def test_deserialize_invalid_data_type(self):
+        """It should not deserialize if the type of the data is invalid"""
+        data = PromotionFactory().serialize()
+        data["start_date"] = 123
+
+        with self.assertRaises(DataValidationError) as context:
+            Promotion().deserialize(data)
+
+        self.assertIn(
+            "Invalid Promotion: body of request contained bad or no data",
+            str(context.exception),
+        )
+        self.assertIsInstance(context.exception.__cause__, TypeError)
 
     def test_list_promotions(self):
         """It should list all Promotions in the database"""
@@ -111,9 +160,31 @@ class TestPromotion(TestCase):
         promotions = Promotion.all()
         self.assertEqual(len(promotions), 5)
 
-    ######################################################################
-    #  D E L E T E   T E S T   C A S E S
-    ######################################################################
+######################################################################
+#  U T I L S   T E S T   C A S E S
+######################################################################
+
+    def test_parse_date_valid_values(self):
+        """It should parse strings and convert into date type"""
+        assert _parse_date(None) is None
+        d = date(2026, 3, 3)
+        assert _parse_date(d) is d
+        assert _parse_date("2026-03-03") == date(2026, 3, 3)
+        assert _parse_date("Tue, 19 Jan 1999 07:12:08 +0900") == date(1999, 1, 19)
+
+    def test_parse_date_invalid_string(self):
+        """It should not parse a non-ISO date format string into a date"""
+        with pytest.raises(ValueError):
+            _parse_date("random string")
+
+    def test_parse_date_invalid_type(self):
+        """It should not parse a non string type to convert into a date"""
+        with pytest.raises(TypeError, match="Invalid date type:"):
+            _parse_date(990119)
+            
+######################################################################
+#  D E L E T E   T E S T   C A S E S
+######################################################################
 
     def test_delete_a_promotion(self):
         """It should Delete a promotion"""
