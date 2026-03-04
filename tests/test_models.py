@@ -116,6 +116,38 @@ class TestPromotion(TestCase):
         self.assertRaises(DataValidationError, promotion.create)
         mock_rollback.assert_called_once()
 
+    def test_deserialize_missing_attribute(self):
+        promotion = PromotionFactory().serialize()
+        del promotion["end_date"]
+
+        with self.assertRaises(DataValidationError) as context:
+            Promotion().deserialize(promotion)
+
+        self.assertIn("missing end_date", str(context.exception))
+        self.assertIsInstance(context.exception.__cause__, KeyError)
+
+    def test_deserialize_invalid_enum(self):
+        """It should not deserialize the data if PromotionType enum is invalid"""
+        promotion = PromotionFactory().serialize()
+        promotion["promotion_type"] = len(PromotionType) + 1
+        with pytest.raises(DataValidationError) as error:
+            Promotion().deserialize(promotion)
+        assert "Invalid Promotion: invalid value" in str(error.value)
+
+    def test_deserialize_invalid_data_type(self):
+        """It should not deserialize if the type of the data is invalid"""
+        data = PromotionFactory().serialize()
+        data["start_date"] = 123
+
+        with self.assertRaises(DataValidationError) as context:
+            Promotion().deserialize(data)
+
+        self.assertIn(
+            "Invalid Promotion: body of request contained bad or no data",
+            str(context.exception),
+        )
+        self.assertIsInstance(context.exception.__cause__, TypeError)
+
     def test_list_promotions(self):
         """It should list all Promotions in the database"""
         promotions = Promotion.all()

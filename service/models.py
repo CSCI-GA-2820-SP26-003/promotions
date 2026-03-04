@@ -124,8 +124,6 @@ class Promotion(db.Model):
             self.end_date = _parse_date(data["end_date"])
             self.value = data["value"]
             self.active = data["active"]
-        except AttributeError as error:
-            raise DataValidationError("Invalid attribute: " + error.args[0]) from error
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Promotion: missing " + error.args[0]
@@ -134,6 +132,10 @@ class Promotion(db.Model):
             raise DataValidationError(
                 "Invalid Promotion: body of request contained bad or no data "
                 + str(error)
+            ) from error
+        except ValueError as error:
+            raise DataValidationError(
+                "Invalid Promotion: invalid value " + str(error)
             ) from error
         return self
 
