@@ -8,7 +8,7 @@ import logging
 from flask_sqlalchemy import SQLAlchemy
 from datetime import date
 from .utils import PromotionType, _parse_date
-
+from service.utils import validate_promotion_value
 
 logger = logging.getLogger("flask.app")
 
@@ -77,6 +77,11 @@ class Promotion(db.Model):
         """
         Updates a Promotion to the database
         """
+        self.active = (
+            True
+            if (date.today() >= self.start_date and date.today() <= self.end_date)
+            else False
+        )
         logger.info("Saving %s", self.name)
         try:
             db.session.commit()
@@ -123,6 +128,7 @@ class Promotion(db.Model):
             self.start_date = _parse_date(data["start_date"])
             self.end_date = _parse_date(data["end_date"])
             self.value = data["value"]
+            validate_promotion_value(self.promotion_type, self.value)
             self.active = data["active"]
         except KeyError as error:
             raise DataValidationError(
