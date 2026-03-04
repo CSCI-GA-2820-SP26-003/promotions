@@ -22,13 +22,13 @@ Test cases for Promotion Model
 import os
 import logging
 from unittest import TestCase
+from unittest.mock import patch
+from datetime import date, timedelta
+import pytest
 from wsgi import app
 from service.models import Promotion, DataValidationError, db
 from service.utils import PromotionType, _parse_date
 from .factories import PromotionFactory
-from datetime import date, timedelta
-from unittest.mock import patch
-import pytest
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -65,16 +65,18 @@ class TestCaseBase(TestCase):
         """This runs after each test"""
         db.session.remove()
 
+
 ######################################################################
 #  Promotion   M O D E L T E S T   C A S E S
 ######################################################################
 
+
 class TestPetModel(TestCaseBase):
     """Pet Model CRUD Tests"""
+
     # ----------------------------------------------------------
     # TEST CREATE
     # ----------------------------------------------------------
-    # Todo: Add your test cases here...
     def test_create_promotion(self):
         """It should Create a promotion and assert that it exists"""
         promotion = Promotion(
@@ -137,7 +139,7 @@ class TestPetModel(TestCaseBase):
 
     @patch.object(db.session, "rollback")
     @patch.object(db.session, "commit", side_effect=Exception("DB Error"))
-    def test_create_promotion_failed(self, mock_commit, mock_rollback):
+    def test_create_promotion_failed(self, _mock_commit, mock_rollback):
         """It should not create a Promotion when the database commit fails"""
         promotion = PromotionFactory()
         self.assertRaises(DataValidationError, promotion.create)
@@ -160,6 +162,43 @@ class TestPetModel(TestCaseBase):
     # ----------------------------------------------------------
     # TEST UPDATE
     # ----------------------------------------------------------
+    def test_update_a_promotion(self):
+        """It should Update a Promotion"""
+        promotion = PromotionFactory()
+        logging.debug(promotion)
+
+        promotion.id = None
+        promotion.create()
+        self.assertIsNotNone(promotion.id)
+
+        # Change it and save it
+        original_id = promotion.id
+        promotion.name = "Updated Promotion Name"
+        promotion.promotion_type = PromotionType.PERCENT_OFF
+        promotion.value = 25
+        promotion.update()
+
+        # id should not change, but data should
+        self.assertEqual(promotion.id, original_id)
+        self.assertEqual(promotion.name, "Updated Promotion Name")
+        self.assertEqual(promotion.promotion_type, PromotionType.PERCENT_OFF)
+        self.assertEqual(promotion.value, 25)
+
+        # Fetch it back and make sure the id hasn't changed
+        promotions = Promotion.all()
+        self.assertEqual(len(promotions), 1)
+        self.assertEqual(promotions[0].id, original_id)
+        self.assertEqual(promotions[0].name, "Updated Promotion Name")
+        self.assertEqual(promotions[0].promotion_type, PromotionType.PERCENT_OFF)
+        self.assertEqual(promotions[0].value, 25)
+
+    def test_update_no_id(self):
+        """It should not Update a Promotion with no id"""
+        promotion = PromotionFactory()
+        logging.debug(promotion)
+        promotion.id = None
+        self.assertRaises(DataValidationError, promotion.update)
+
     def test_update_sets_active_status(self):
         """It should automatically set active status when updating a Promotion"""
         promo = PromotionFactory(start_date=date.today(), end_date=date.today())
@@ -225,19 +264,9 @@ class TestPetModel(TestCaseBase):
         )
         self.assertIsInstance(context.exception.__cause__, TypeError)
 
-
     ######################################################################
     #  U T I L S   T E S T   C A S E S
     ######################################################################
-    def test_update_sets_active_status(self):
-        """It should automatically set active status when updating a Promotion"""
-        promo = PromotionFactory(start_date=date.today(), end_date=date.today())
-        promo.create()
-
-        promo.update()
-
-        self.assertTrue(promo.active)
-
     def test_deserialize_invalid_payback_percent_value(self):
         """It should not deserialize PAYBACK_PERCENT when value is invalid"""
         data = PromotionFactory().serialize()

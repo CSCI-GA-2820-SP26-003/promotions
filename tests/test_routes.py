@@ -25,10 +25,10 @@ from unittest import TestCase
 from urllib.parse import quote_plus
 from wsgi import app
 from service.common import status
-from service.models import db, Promotion
+from service.models import db, Promotion, DataValidationError
 from service.utils import PromotionType, _parse_date
 from .factories import PromotionFactory
-from service.models import DataValidationError
+
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
@@ -90,11 +90,13 @@ class TestPromotionService(TestCase):
         self.assertIn("promotions", data["resources"])
 
     def test_404_returns_json(self):
+        """Test 404 returns"""
         resp = self.client.get("/not_found")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
         self.assertTrue(resp.is_json)
 
     def test_405_returns_json(self):
+        """Test 405 returns"""
         resp = self.client.put("/promotions")
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertTrue(resp.is_json)
@@ -160,7 +162,6 @@ class TestPromotionService(TestCase):
         self.assertEqual(new_promotion["value"], test_promotion.value)
         self.assertEqual(new_promotion["active"], test_promotion.active)
 
-        # Todo: uncomment this code when get_promotions is implemented
         # Check that the location header was correct
         response = self.client.get(location)
         self.assertEqual(response.status_code, status.HTTP_200_OK)

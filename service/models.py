@@ -5,10 +5,10 @@ All of the models are stored in this module
 """
 
 import logging
-from flask_sqlalchemy import SQLAlchemy
 from datetime import date
-from .utils import PromotionType, _parse_date
+from flask_sqlalchemy import SQLAlchemy
 from service.utils import validate_promotion_value
+from .utils import PromotionType, _parse_date
 
 logger = logging.getLogger("flask.app")
 
@@ -37,8 +37,6 @@ class Promotion(db.Model):
     value = db.Column(db.Integer)
     active = db.Column(db.Boolean, default=True, nullable=False)
 
-    # Todo: Place the rest of your schema here...
-
     def __repr__(self):
         return (
             f"<Promotion id=[{self.id}], name=[{self.name}], "
@@ -51,19 +49,15 @@ class Promotion(db.Model):
         """
         Creates a Promotion to the database
         """
-        self.active = (
-            True
-            if (date.today() >= self.start_date and date.today() <= self.end_date)
-            else False
-        )
+        self.active = date.today() >= self.start_date and date.today() <= self.end_date
         logger.info("Creating Promotion")
-        logger.info(f"ID={self.id}")
-        logger.info(f"name={self.name}")
-        logger.info(f"promotion type={PromotionType(self.promotion_type).name}")
-        logger.info(f"value={self.value}")
-        logger.info(f"start_date={self.start_date.strftime('%b-%d-%Y')}")
-        logger.info(f"end_date={self.end_date.strftime('%b-%d-%Y')}")
-        logger.info(f"active={self.active}")
+        logger.info("ID=%s", self.id)
+        logger.info("name=%s", self.name)
+        logger.info("promotion type=%s", PromotionType(self.promotion_type).name)
+        logger.info("value=%s", self.value)
+        logger.info("start_date=%s", self.start_date.strftime("%b-%d-%Y"))
+        logger.info("end_date=%s", self.end_date.strftime("%b-%d-%Y"))
+        logger.info("active=%s", self.active)
 
         try:
             db.session.add(self)
@@ -77,11 +71,10 @@ class Promotion(db.Model):
         """
         Updates a Promotion to the database
         """
-        self.active = (
-            True
-            if (date.today() >= self.start_date and date.today() <= self.end_date)
-            else False
-        )
+        if self.id is None:
+            raise DataValidationError("Update called with no id")
+
+        self.active = date.today() >= self.start_date and date.today() <= self.end_date
         logger.info("Saving %s", self.name)
         try:
             db.session.commit()
