@@ -108,11 +108,7 @@ class TestPromotion(TestCase):
     @patch.object(db.session, "commit", side_effect=Exception("DB Error"))
     def test_create_promotion_failed(self, mock_commit, mock_rollback):
         """It should not create a Promotion when the database commit fails"""
-        promotion = PromotionFactory(
-            start_date=date.today(),
-            end_date=date.today() + timedelta(days=1),
-        )
-
+        promotion = PromotionFactory()
         self.assertRaises(DataValidationError, promotion.create)
         mock_rollback.assert_called_once()
 
@@ -160,9 +156,9 @@ class TestPromotion(TestCase):
         promotions = Promotion.all()
         self.assertEqual(len(promotions), 5)
 
-######################################################################
-#  U T I L S   T E S T   C A S E S
-######################################################################
+    ######################################################################
+    #  U T I L S   T E S T   C A S E S
+    ######################################################################
 
     def test_parse_date_valid_values(self):
         """It should parse strings and convert into date type"""
@@ -181,12 +177,12 @@ class TestPromotion(TestCase):
         """It should not parse a non string type to convert into a date"""
         with pytest.raises(TypeError, match="Invalid date type:"):
             _parse_date(990119)
-            
-######################################################################
-#  D E L E T E   T E S T   C A S E S
-######################################################################
 
-    def test_delete_a_promotion(self):
+    ######################################################################
+    #  D E L E T E   T E S T   C A S E S
+    ######################################################################
+
+    def test_delete_promotion(self):
         """It should Delete a promotion"""
         promotion = PromotionFactory()
         promotion.create()
@@ -194,6 +190,15 @@ class TestPromotion(TestCase):
         # delete the pet and make sure it isn't in the database
         promotion.delete()
         self.assertEqual(len(Promotion.all()), 0)
+
+    @patch.object(db.session, "rollback")
+    @patch.object(db.session, "delete", side_effect=Exception("DB Error"))
+    def test_delete_promotion_failed(self, mock_delete, mock_rollback):
+        """It should not delete a Promotion when the database delete fails"""
+        promotion = PromotionFactory()
+        self.assertRaises(DataValidationError, promotion.delete)
+        mock_delete.assert_called_once_with(promotion)
+        mock_rollback.assert_called_once()
 
 
 ######################################################################
