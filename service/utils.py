@@ -1,3 +1,7 @@
+"""
+Utility functions and types for the Promotions service.
+"""
+
 from enum import Enum
 from datetime import date
 from email.utils import parsedate_to_datetime
@@ -14,6 +18,7 @@ class PromotionType(Enum):
     FIXED_DISCOUNT = 3  # valid Value: int > 0 (in USD)
     FREE_SHIPPING = 4  # valid Value: fixed or minimum purchase amount (tbd)
     PAYBACK_PERCENT = 5  # valid Value: 1-100
+
 
 def validate_promotion_value(promotion_type, value):
     """Validate value based on promotion type"""
@@ -32,6 +37,7 @@ def validate_promotion_value(promotion_type, value):
     elif promotion_type in (PromotionType.BUY_N_GET_ONE, PromotionType.FIXED_DISCOUNT):
         if value <= 0:
             raise ValueError("value is invalid for BUY_N_GET_ONE or FIXED_DISCOUNT")
+
 
 def _parse_date(value):
     if value is None:

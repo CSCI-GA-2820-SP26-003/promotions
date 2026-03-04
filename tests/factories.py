@@ -2,11 +2,11 @@
 Test Factory to make fake objects for testing
 """
 
+from datetime import date, timedelta
 import factory
 from factory import fuzzy
 from service.models import Promotion
 from service.utils import PromotionType
-from datetime import date, timedelta
 
 
 class PromotionFactory(factory.Factory):
@@ -24,6 +24,5 @@ class PromotionFactory(factory.Factory):
     # Temporarily only creating expired promotions
     start_date = fuzzy.FuzzyDate(date(2020, 1, 1), date.today() - timedelta(days=1))
     end_date = fuzzy.FuzzyDate(date(2020, 1, 1), date.today() - timedelta(days=1))
-    # Todo: uncomment this code when active status auto-detection is implemented
     # active = fuzzy.FuzzyChoice(choices=[True, False])
     active = False
