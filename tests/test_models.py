@@ -69,18 +69,10 @@ class TestPromotion(TestCase):
     #  T E S T   C A S E S
     ######################################################################
 
-    def test_example_replace_this(self):
-        """It should create a Promotion"""
-        # Todo: Remove this test case example
-        resource = PromotionFactory()
-        resource.create()
-        self.assertIsNotNone(resource.id)
-        found = Promotion.all()
-        self.assertEqual(len(found), 1)
-        data = Promotion.find(resource.id)
-        self.assertEqual(data.name, resource.name)
+    # ----------------------------------------------------------
+    # TEST CREATE
+    # ----------------------------------------------------------
 
-    # Todo: Add your test cases here...
     def test_create_promotion(self):
         """It should Create a promotion and assert that it exists"""
         promotion = Promotion(
@@ -116,6 +108,55 @@ class TestPromotion(TestCase):
         self.assertRaises(DataValidationError, promotion.create)
         mock_rollback.assert_called_once()
 
+    # ----------------------------------------------------------
+    # TEST LIST
+    # ----------------------------------------------------------
+    def test_list_promotions(self):
+        """It should list all Promotions in the database"""
+        promotions = Promotion.all()
+        self.assertEqual(promotions, [])
+        for _ in range(5):
+            promotion = PromotionFactory()
+            promotion.create()
+        # See if we get back 5 promotions
+        promotions = Promotion.all()
+        self.assertEqual(len(promotions), 5)
+
+    # ----------------------------------------------------------
+    # TEST UPDATE
+    # ----------------------------------------------------------
+    def test_update_sets_active_status(self):
+        """It should automatically set active status when updating a Promotion"""
+        promo = PromotionFactory(start_date=date.today(), end_date=date.today())
+        promo.create()
+
+        promo.update()
+
+        self.assertTrue(promo.active)
+
+    def test_update_failed(self):
+        """It should not update a Promotion when the database commit fails"""
+        promo = PromotionFactory()
+        promo.create()
+
+        with patch.object(db.session, "commit", side_effect=Exception("DB Error")):
+            self.assertRaises(DataValidationError, promo.update)
+
+    # ----------------------------------------------------------
+    # TEST DELETE
+    # ----------------------------------------------------------
+    def test_delete_a_promotion(self):
+        """It should Delete a promotion"""
+        promotion = PromotionFactory()
+        promotion.create()
+        self.assertEqual(len(Promotion.all()), 1)
+        # delete the pet and make sure it isn't in the database
+        promotion.delete()
+        self.assertEqual(len(Promotion.all()), 0)
+
+    # ----------------------------------------------------------
+    # TEST DESERIALIZE
+    # ----------------------------------------------------------
     def test_deserialize_missing_attribute(self):
         """It should not deserialize if the data is missing"""
         promotion = PromotionFactory().serialize()
@@ -149,29 +190,6 @@ class TestPromotion(TestCase):
         )
         self.assertIsInstance(context.exception.__cause__, TypeError)
 
-    def test_list_promotions(self):
-        """It should list all Promotions in the database"""
-        promotions = Promotion.all()
-        self.assertEqual(promotions, [])
-        for _ in range(5):
-            promotion = PromotionFactory()
-            promotion.create()
-        # See if we get back 5 promotions
-        promotions = Promotion.all()
-        self.assertEqual(len(promotions), 5)
-
-    def test_update_sets_active_status(self):
-        """It should automatically set active status when updating a Promotion"""
-        promo = PromotionFactory(
-            start_date=date.today(),
-            end_date=date.today()
-        )
-        promo.create()
-
-        promo.update()
-
-        self.assertTrue(promo.active)
-
     def test_deserialize_invalid_payback_percent_value(self):
         """It should not deserialize PAYBACK_PERCENT when value is invalid"""
         data = PromotionFactory().serialize()
@@ -201,9 +219,9 @@ class TestPromotion(TestCase):
 
         self.assertIn("value cannot be negative", str(context.exception))
 
-######################################################################
-#  U T I L S   T E S T   C A S E S
-######################################################################
+    ######################################################################
+    #  U T I L S   T E S T   C A S E S
+    ######################################################################
 
     def test_parse_date_valid_values(self):
         """It should parse strings and convert into date type"""
@@ -222,19 +240,6 @@ class TestPromotion(TestCase):
         """It should not parse a non string type to convert into a date"""
         with pytest.raises(TypeError, match="Invalid date type:"):
             _parse_date(990119)
-            
-######################################################################
-#  D E L E T E   T E S T   C A S E S
-######################################################################
-
-    def test_delete_a_promotion(self):
-        """It should Delete a promotion"""
-        promotion = PromotionFactory()
-        promotion.create()
-        self.assertEqual(len(Promotion.all()), 1)
-        # delete the pet and make sure it isn't in the database
-        promotion.delete()
-        self.assertEqual(len(Promotion.all()), 0)
 
 
 ######################################################################
