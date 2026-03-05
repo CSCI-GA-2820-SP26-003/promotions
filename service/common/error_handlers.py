@@ -25,13 +25,13 @@ from . import status
 ######################################################################
 # Error Handlers
 ######################################################################
-@app.errorhandler(DataValidationError) # pragma: no cover
+@app.errorhandler(DataValidationError)  # pragma: no cover
 def request_validation_error(error):
     """Handles Value Errors from bad data"""
     return bad_request(error)
 
 
-@app.errorhandler(status.HTTP_400_BAD_REQUEST) # pragma: no cover
+@app.errorhandler(status.HTTP_400_BAD_REQUEST)  # pragma: no cover
 def bad_request(error):
     """Handles bad requests with 400_BAD_REQUEST"""
     message = str(error)
@@ -44,7 +44,7 @@ def bad_request(error):
     )
 
 
-@app.errorhandler(status.HTTP_404_NOT_FOUND) # pragma: no cover
+@app.errorhandler(status.HTTP_404_NOT_FOUND)  # pragma: no cover
 def not_found(error):
     """Handles resources not found with 404_NOT_FOUND"""
     message = str(error)
@@ -55,7 +55,7 @@ def not_found(error):
     )
 
 
-@app.errorhandler(status.HTTP_405_METHOD_NOT_ALLOWED) # pragma: no cover
+@app.errorhandler(status.HTTP_405_METHOD_NOT_ALLOWED)  # pragma: no cover
 def method_not_supported(error):
     """Handles unsupported HTTP methods with 405_METHOD_NOT_SUPPORTED"""
     message = str(error)
@@ -70,7 +70,7 @@ def method_not_supported(error):
     )
 
 
-@app.errorhandler(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE) # pragma: no cover
+@app.errorhandler(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)  # pragma: no cover
 def mediatype_not_supported(error):
     """Handles unsupported media requests with 415_UNSUPPORTED_MEDIA_TYPE"""
     message = str(error)
@@ -85,7 +85,7 @@ def mediatype_not_supported(error):
     )
 
 
-@app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR) # pragma: no cover
+@app.errorhandler(status.HTTP_500_INTERNAL_SERVER_ERROR)  # pragma: no cover
 def internal_server_error(error):
     """Handles unexpected server error with 500_SERVER_ERROR"""
     message = str(error)
