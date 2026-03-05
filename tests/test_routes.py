@@ -181,6 +181,30 @@ class TestPromotionService(TestCase):
         self.assertEqual(new_promotion["active"], test_promotion.active)
 
     # ----------------------------------------------------------
+    # TEST UPDATE
+    # ----------------------------------------------------------
+    def test_update_promotion(self):
+        """It should Update an existing Promotion"""
+        # create a promotion to update
+        test_promo = PromotionFactory()
+        response = self.client.post(BASE_URL, json=test_promo.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        # update the promotion
+        new_promo = response.get_json()
+        logging.debug(new_promo)
+
+        new_promo["name"] = "Updated Promotion"
+        new_promo["value"] = 20
+
+        response = self.client.put(f"{BASE_URL}/{new_promo['id']}", json=new_promo)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        updated_promo = response.get_json()
+        self.assertEqual(updated_promo["name"], "Updated Promotion")
+        self.assertEqual(updated_promo["value"], 20)
+
+    # ----------------------------------------------------------
     # TEST DELETE
     # ----------------------------------------------------------
     def test_delete_promotion(self):
@@ -338,17 +362,6 @@ class TestPromotionService(TestCase):
         self.assertEqual(data["promotion_type"], promo.promotion_type.value)
         self.assertEqual(data["value"], promo.value)
         self.assertEqual(data["active"], promo.active)
-
-    def test_update_promotion(self):
-        """It should update a Promotion"""
-        promo = PromotionFactory()
-        promo.create()
-
-        promo.name = "Updated Promotion"
-        promo.update()
-
-        found = Promotion.find(promo.id)
-        self.assertEqual(found.name, "Updated Promotion")
 
     def test_deserialize_invalid_type(self):
         """It should raise DataValidationError when deserialize is given wrong type"""
