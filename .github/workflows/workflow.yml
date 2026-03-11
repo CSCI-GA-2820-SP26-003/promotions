@@ -53,7 +53,9 @@ jobs:
         run: python -m pip install --upgrade pip pipenv
 
       - name: Install dependencies
-        run: pipenv sync --dev
+        run: |
+          pipenv sync --dev
+          pip install flask-restx
 
       - name: Lint
         run: make lint
