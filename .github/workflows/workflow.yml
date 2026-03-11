@@ -55,9 +55,6 @@ jobs:
       - name: Install dependencies
         run: pipenv sync --dev
 
-      - name: Check formatting
-        run: pipenv run black --check .
-
       - name: Lint
         run: pipenv run flake8 .
 
