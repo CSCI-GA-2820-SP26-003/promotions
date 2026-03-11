@@ -263,25 +263,3 @@ class PromotionResource(Resource):
             promotion.delete()
 
         return "", status.HTTP_204_NO_CONTENT
-
-
-######################################################################
-# Checks the ContentType of a request
-######################################################################
-# def check_content_type(content_type) -> None:
-#     """Checks that the media type is correct"""
-#     if "Content-Type" not in request.headers:
-#         app.logger.error("No Content-Type specified.")
-#         abort(
-#             status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-#             f"Content-Type must be {content_type}",
-#         )
-
-#     if request.headers["Content-Type"] == content_type:
-#         return
-
-#     app.logger.error("Invalid Content-Type: %s", request.headers["Content-Type"])
-#     abort(
-#         status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-#         f"Content-Type must be {content_type}",
-#     )
