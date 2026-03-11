@@ -51,11 +51,11 @@ jobs:
 
       - name: Install Pipenv
         run: python -m pip install --upgrade pip pipenv
-
+        
       - name: Install dependencies
         run: |
           pipenv sync --dev
-          pip install flask-restx
+          pipenv run pip install flask-restx
 
       - name: Lint
         run: make lint
