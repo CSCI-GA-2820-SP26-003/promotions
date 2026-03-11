@@ -20,6 +20,7 @@ and SQL database
 """
 import sys
 from flask import Flask
+from flask_restx import Api
 from service import config
 from service.common import log_handlers
 
@@ -27,11 +28,42 @@ from service.common import log_handlers
 ############################################################
 # Initialize the Flask instance
 ############################################################
+api = Api(
+    title="Promotions API",
+    version="1.0.0",
+    description="Promotions service API",
+    doc="/apidocs",
+)
+
+def api_root():
+    """Root URL response for Flask-RESTX"""
+    return {
+        "name": "Promotions REST API Service",
+        "version": "1.0",
+        "resources": {
+            "promotions": "/promotions"
+        },
+    }, 200
+
+api.render_root = api_root
+
 def create_app():
     """Initialize the core application."""
     # Create Flask application
     app = Flask(__name__)
     app.config.from_object(config)
+
+    # Initialize Flask-RESTX
+    api.init_app(app)
+
+    # @app.route("/", methods=["GET"])
+    # def index():
+    #     """Root URL response"""
+    #     return {
+    #         "name": "Promotions REST API Service",
+    #         "version": "1.0",
+    #         "paths": "/promotions",
+    #     }, 200
 
     # Initialize Plugins
     # pylint: disable=import-outside-toplevel
