@@ -6,6 +6,7 @@ WORKDIR /app
 COPY Pipfile Pipfile.lock ./
 RUN sudo python -m pip install --upgrade pip pipenv && \
     sudo pipenv install --system --dev
+RUN sudo pip install flask-restx
 
 # Install user mode tools
 COPY .devcontainer/scripts/install-tools.sh /tmp/
