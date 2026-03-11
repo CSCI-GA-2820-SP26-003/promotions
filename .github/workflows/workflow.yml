@@ -56,7 +56,7 @@ jobs:
         run: pipenv sync --dev
 
       - name: Lint
-        run: pipenv run flake8 .
+        run: make lint
 
       - name: Run tests
         run: pipenv run pytest tests --cov --cov-branch --cov-report=xml
