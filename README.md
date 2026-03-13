@@ -4,6 +4,9 @@
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://python.org/)
 [![Flask](https://img.shields.io/badge/Framework-Flask-lightgrey.svg)](https://flask.palletsprojects.com/)
 
+![Build Status](https://github.com/CSCI-GA-2820-SP26-003/promotions/actions/workflows/workflow.yml/badge.svg)
+[![codecov](https://codecov.io/gh/CSCI-GA-2820-SP26-003/promotions/graph/badge.svg?token=4D67OH8E5W)](https://codecov.io/gh/CSCI-GA-2820-SP26-003/promotions)
+
 # Promotions Service
 
 The Promotions Service is a RESTful web service for creating and managing retail promotions. It stores promotion metadata in a PostgreSQL database and exposes endpoints to create, retrieve, list, filter, and delete promotions. Promotions support multiple business rules such as percentage discounts, fixed discounts, free shipping, and buy-n-get-one offers.

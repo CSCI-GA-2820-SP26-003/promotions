@@ -1,0 +1,75 @@
+name: CI Build
+on:
+  push:
+    branches:
+      - master
+      - CI-Integration
+  pull_request:
+    branches:
+      - master
+      - CI-Integration
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      PORT: 8080
+      FLASK_APP: wsgi:app
+      FLASK_DEBUG: "True"
+      GUNICORN_BIND: "0.0.0.0:8080"
+      DATABASE_URI: postgresql+psycopg://postgres:pgs3cr3t@localhost:5432/postgres
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pgs3cr3t
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: "pipenv"
+
+      - name: Install Pipenv
+        run: python -m pip install --upgrade pip pipenv
+        
+      - name: Install dependencies
+        run: |
+          pipenv sync --dev
+          pipenv run pip install flask-restx
+
+      - name: Lint
+        run: make lint
+
+      - name: Run tests
+        run: pipenv run pytest tests --cov --cov-branch --cov-report=xml
+
+      - name: Install packages for Codecov to work
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y git curl gpg
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: CSCI-GA-2820-SP26-003/promotions
