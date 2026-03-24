@@ -290,3 +290,28 @@ class ActivatePromotion(Resource):
         db.session.commit()
 
         return promotion.serialize(), status.HTTP_200_OK
+    
+######################################################################
+# DEACTIVATE A PROMOTION
+######################################################################
+@promotions_ns.route("/<int:promotion_id>/deactivate")
+@promotions_ns.param("promotion_id", "The Promotion identifier")
+class DeactivatePromotion(Resource):
+    """Deactivate a Promotion"""
+
+    @promotions_ns.marshal_with(promotion_model)
+    def put(self, promotion_id):
+        """Deactivate a promotion"""
+        app.logger.info("Request to deactivate promotion with id [%s]", promotion_id)
+
+        promotion = Promotion.find(promotion_id)
+        if not promotion:
+            abort(
+                status.HTTP_404_NOT_FOUND,
+                f"Promotion with id '{promotion_id}' was not found.",
+            )
+
+        promotion.active = False
+        promotion.update()
+
+        return promotion.serialize(), status.HTTP_200_OK
