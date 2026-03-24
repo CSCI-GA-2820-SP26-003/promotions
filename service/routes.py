@@ -279,6 +279,7 @@ class PromotionResource(Resource):
 
         return "", status.HTTP_204_NO_CONTENT
 
+
 ######################################################################
 # ACTIVATE A PROMOTION
 ######################################################################
@@ -301,11 +302,11 @@ class ActivatePromotion(Resource):
             )
 
         promotion.active = True
-        from service.models import db
-        db.session.commit()
+        promotion.update()
 
         return promotion.serialize(), status.HTTP_200_OK
-    
+
+
 ######################################################################
 # DEACTIVATE A PROMOTION
 ######################################################################
