@@ -306,6 +306,22 @@ class TestPromotionService(TestCase):
         for promotion in data:
             self.assertEqual(promotion["active"], False)
 
+    def test_query_by_value(self):
+        """It should Query Promotions by value"""
+        promotions = self._create_promotions(10)
+        test_value = promotions[0].value
+        value_count = len(
+            [promotion for promotion in promotions if promotion.value == test_value]
+        )
+
+        response = self.client.get(BASE_URL, query_string=f"value={test_value}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.get_json()
+        self.assertEqual(len(data), value_count)
+        for promotion in data:
+            self.assertEqual(promotion["value"], test_value)
+
     # ----------------------------------------------------------
     # TEST RETRIEVE
     # ----------------------------------------------------------
@@ -372,6 +388,23 @@ class TestPromotionService(TestCase):
         """It should raise KeyError for invalid promotion_type query"""
         with self.assertRaises(KeyError):
             self.client.get(BASE_URL, query_string="promotion_type=INVALID_TYPE")
+
+    def test_query_by_empty_value(self):
+        """It should return an empty list when value query is empty"""
+        self._create_promotions(5)
+        response = self.client.get(BASE_URL, query_string="value=")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 0)
+
+    def test_query_by_invalid_value(self):
+        """It should return an empty list when value query is invalid"""
+        self._create_promotions(5)
+
+        response = self.client.get(BASE_URL, query_string="value=abc")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 0)
 
     def test_find_promotion_not_found(self):
         """It should return None when promotion is not found"""

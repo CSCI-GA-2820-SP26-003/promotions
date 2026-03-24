@@ -448,3 +448,21 @@ class TestModelQueries(TestCaseBase):
         self.assertEqual(found.count(), count)
         for promotion in found:
             self.assertEqual(promotion.promotion_type, promotion_type)
+
+    def test_find_by_value(self):
+        """It should Find Promotions by value"""
+        promotions = []
+        for i in range(10):
+            promotion = PromotionFactory()
+            promotion.id = None
+            promotion.value = 20 if i % 2 == 0 else 10
+            promotion.create()
+            promotions.append(promotion)
+
+        value = 20
+        count = len([promotion for promotion in promotions if promotion.value == value])
+
+        found = Promotion.find_by_value(value)
+        self.assertEqual(found.count(), count)
+        for promotion in found:
+            self.assertEqual(promotion.value, value)
