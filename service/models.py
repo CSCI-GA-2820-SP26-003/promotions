@@ -74,7 +74,7 @@ class Promotion(db.Model):
         if self.id is None:
             raise DataValidationError("Update called with no id")
 
-        self.active = date.today() >= self.start_date and date.today() <= self.end_date
+        # self.active = date.today() >= self.start_date and date.today() <= self.end_date
         logger.info("Saving %s", self.name)
         try:
             db.session.commit()
