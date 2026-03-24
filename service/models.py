@@ -193,3 +193,9 @@ class Promotion(db.Model):
             raise TypeError("Invalid active, must be of type boolean")
         logger.info("Processing available query for %s ...", active)
         return cls.query.filter(cls.active == active)
+
+    @classmethod
+    def find_by_value(cls, value) -> list:
+        """Returns all Promotions with the given value"""
+        logger.info("Processing value query for %s ...", value)
+        return cls.query.filter(cls.value == value)

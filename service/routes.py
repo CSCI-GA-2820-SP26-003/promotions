@@ -77,6 +77,7 @@ api.add_namespace(promotions_ns, path="/promotions")
 #             "paths": "/promotions",
 #         }, status.HTTP_200_OK
 
+
 ######################################################################
 # Utility Functions
 ######################################################################
@@ -112,6 +113,7 @@ def str_to_bool(value):
 
     return None
 
+
 ######################################################################
 # LIST ALL PROMOTIONS / CREATE PROMOTION
 ######################################################################
@@ -121,6 +123,7 @@ class PromotionCollection(Resource):
     """
     Handles all interactions with collections of Promotions
     """
+
     ##################################################################
     # LIST ALL PROMOTIONS
     ##################################################################
@@ -134,6 +137,7 @@ class PromotionCollection(Resource):
         name = request.args.get("name")
         promotion_type = request.args.get("promotion_type")
         active = request.args.get("active")
+        value = request.args.get("value")
 
         # Query by name
         if name:
@@ -154,6 +158,16 @@ class PromotionCollection(Resource):
                 promotions = []
             else:
                 promotions = Promotion.find_by_active(active_value)
+
+        # Query by promotion value
+        elif value is not None:
+            if value == "":
+                promotions = []
+            else:
+                try:
+                    promotions = Promotion.find_by_value(int(value))
+                except ValueError:
+                    promotions = []
 
         # Return all promotions
         else:
@@ -188,6 +202,7 @@ class PromotionCollection(Resource):
             status.HTTP_201_CREATED,
             {"Location": location_url},
         )
+
 
 ######################################################################
 # RETRIEVE / UPDATE / DELETE A SINGLE PROMOTION
