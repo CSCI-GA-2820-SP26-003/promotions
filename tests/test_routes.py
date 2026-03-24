@@ -88,6 +88,11 @@ class TestPromotionService(TestCase):
 
         data = response.get_json()
         self.assertTrue(data["active"])
+        
+    def test_activate_promotion_not_found(self):
+        """It should return 404 when activating a Promotion that does not exist"""
+        response = self.client.put(f"{BASE_URL}/999999/activate")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     # def test_index(self):
     # """It should call the home page"""
