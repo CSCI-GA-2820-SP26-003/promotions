@@ -263,3 +263,30 @@ class PromotionResource(Resource):
             promotion.delete()
 
         return "", status.HTTP_204_NO_CONTENT
+
+######################################################################
+# ACTIVATE A PROMOTION
+######################################################################
+@promotions_ns.route("/<int:promotion_id>/activate")
+@promotions_ns.param("promotion_id", "The Promotion identifier")
+class ActivatePromotion(Resource):
+    """Activate a Promotion"""
+
+    @promotions_ns.marshal_with(promotion_model)
+    def put(self, promotion_id):
+        """Activate a promotion"""
+        app.logger.info("Request to activate promotion with id [%s]", promotion_id)
+
+        promotion = Promotion.find(promotion_id)
+
+        if not promotion:
+            abort(
+                status.HTTP_404_NOT_FOUND,
+                f"Promotion with id '{promotion_id}' was not found.",
+            )
+
+        promotion.active = True
+        from service.models import db
+        db.session.commit()
+
+        return promotion.serialize(), status.HTTP_200_OK

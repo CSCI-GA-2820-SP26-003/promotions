@@ -72,6 +72,28 @@ class TestPromotionService(TestCase):
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
 
+    def test_activate_promotion(self):
+        """It should Activate a Promotion"""
+        # create a promotion
+        test_promo = PromotionFactory(active=False)
+        response = self.client.post(BASE_URL, json=test_promo.serialize())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        data = response.get_json()
+        promo_id = data["id"]
+
+        # call activate
+        response = self.client.put(f"{BASE_URL}/{promo_id}/activate")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        data = response.get_json()
+        self.assertTrue(data["active"])
+        
+    def test_activate_promotion_not_found(self):
+        """It should return 404 when activating a Promotion that does not exist"""
+        response = self.client.put(f"{BASE_URL}/999999/activate")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
     # def test_index(self):
     # """It should call the home page"""
     # resp = self.client.get("/")
