@@ -25,7 +25,7 @@ from flask import request, abort
 from flask import current_app as app  # Import Flask application
 from flask_restx import Namespace, Resource, fields
 from service import api
-from service.models import Promotion, db
+from service.models import Promotion
 from service.common import status  # HTTP Status Codes
 from service.utils import PromotionType
 
@@ -286,7 +286,8 @@ class ActivatePromotion(Resource):
             )
 
         promotion.active = True
-        promotion.update()
+        from service.models import db
+        db.session.commit()
 
         return promotion.serialize(), status.HTTP_200_OK
     
