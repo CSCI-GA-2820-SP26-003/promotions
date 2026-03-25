@@ -3,11 +3,9 @@ on:
   push:
     branches:
       - master
-      - CI-Integration
   pull_request:
     branches:
       - master
-      - CI-Integration
 
 permissions:
   contents: read
