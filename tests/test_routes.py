@@ -147,6 +147,14 @@ class TestPromotionService(TestCase):
     # Utility function to bulk create pets
     ############################################################
 
+    def test_health_endpoint(self):
+        """It should return service health"""
+        resp = self.client.get("/health")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertTrue(resp.is_json)
+        data = resp.get_json()
+        self.assertEqual(data.get("status"), "healthy")
+
     def _create_promotions(self, count: int = 1) -> list:
         """Factory method to create promotions in bulk"""
         promotions = []

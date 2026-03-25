@@ -30,12 +30,11 @@ from service.common import status  # HTTP Status Codes
 from service.utils import PromotionType
 
 promotions_ns = Namespace("promotions", description="Promotion operations")
+root_ns = Namespace("", description="Root operations")
 
 ######################################################################
 # Namespace
 ######################################################################
-# root_ns = Namespace("", description="Root operations")
-# promotions_ns = Namespace("promotions", description="Promotion operations")
 
 
 ######################################################################
@@ -58,9 +57,24 @@ promotion_model = promotions_ns.model(
 ######################################################################
 # Add Namespace
 ######################################################################
-# api.add_namespace(root_ns, path="")
-# api.add_namespace(promotions_ns, path="/promotions")
+api.add_namespace(root_ns, path="")
 api.add_namespace(promotions_ns, path="/promotions")
+
+######################################################################
+# HEALTH ENDPOINT
+######################################################################
+@root_ns.route("/health")
+class HealthResource(Resource):
+    """Health check endpoint"""
+
+    def get(self):
+        """
+        Health check endpoint
+        Returns the health status of the service
+        """
+        app.logger.info("Health check requested")
+        return {"status": "healthy"}, status.HTTP_200_OK
+
 
 ######################################################################
 # GET INDEX
