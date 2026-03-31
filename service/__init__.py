@@ -33,19 +33,21 @@ api = Api(
     version="1.0.0",
     description="Promotions service API",
     doc="/apidocs",
+    prefix="/api",
 )
+
 
 def api_root():
     """Root URL response for Flask-RESTX"""
     return {
         "name": "Promotions REST API Service",
         "version": "1.0",
-        "resources": {
-            "promotions": "/promotions"
-        },
+        "resources": {"promotions": "/promotions"},
     }, 200
 
+
 api.render_root = api_root
+
 
 def create_app():
     """Initialize the core application."""
@@ -56,18 +58,10 @@ def create_app():
     # Initialize Flask-RESTX
     api.init_app(app)
 
-    # @app.route("/", methods=["GET"])
-    # def index():
-    #     """Root URL response"""
-    #     return {
-    #         "name": "Promotions REST API Service",
-    #         "version": "1.0",
-    #         "paths": "/promotions",
-    #     }, 200
-
     # Initialize Plugins
     # pylint: disable=import-outside-toplevel
     from service.models import db
+
     db.init_app(app)
 
     with app.app_context():
@@ -79,7 +73,10 @@ def create_app():
         try:
             db.create_all()
         except Exception as error:  # pylint: disable=broad-except  # pragma: no cover
-            app.logger.warning("Database initialization failed: %s (continuing with degraded functionality)", error)  # pragma: no cover
+            app.logger.warning(
+                "Database initialization failed: %s (continuing with degraded functionality)",
+                error,
+            )  # pragma: no cover
 
         # Set up logging for production
         log_handlers.init_logging(app, "gunicorn.error")
