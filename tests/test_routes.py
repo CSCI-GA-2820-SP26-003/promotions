@@ -155,6 +155,13 @@ class TestPromotionService(TestCase):
         data = resp.get_json()
         self.assertEqual(data.get("status"), "healthy")
 
+    def test_ui_route(self):
+        """It should load the UI page"""
+        resp = self.client.get("/ui")
+
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertIn(b"Promotions", resp.data)
+    
     def _create_promotions(self, count: int = 1) -> list:
         """Factory method to create promotions in bulk"""
         promotions = []
