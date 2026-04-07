@@ -7,6 +7,8 @@ const clearBtn = document.getElementById("clearBtn");
 const promotionList = document.getElementById("promotionList");
 const messageBox = document.getElementById("messageBox");
 
+let promotionsCache = [];
+
 function showMessage(text, type = "info") {
     messageBox.textContent = text;
     messageBox.className = `message ${type}`;
@@ -44,14 +46,176 @@ function renderPromotions(promotions) {
             <p><strong>ID:</strong> ${promotion.id}</p>
             <p><strong>Description:</strong> ${promotion.description || "N/A"}</p>
             <p><strong>Type:</strong> ${formatPromotionType(promotion.promotion_type)}</p>
+            <p><strong>Value:</strong> ${promotion.value ?? "N/A"}</p>
+            <p><strong>Start Date:</strong> ${promotion.start_date || "N/A"}</p>
+            <p><strong>End Date:</strong> ${promotion.end_date || "N/A"}</p>
             <p>
                 <strong>Status:</strong>
                 <span class="badge ${activeClass}">${activeText}</span>
             </p>
         `;
 
+        const actions = document.createElement("div");
+        actions.className = "actions";
+
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Edit";
+        editBtn.className = "btn-secondary";
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Delete";
+        deleteBtn.className = "btn-danger";
+
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
+
+        const form = document.createElement("form");
+        form.className = "edit-form";
+        form.style.display = "none";
+
+        form.innerHTML = `
+            <div class="form-row">
+                <div>
+                    <label for="name-${promotion.id}">Name</label>
+                    <input id="name-${promotion.id}" name="name" type="text" value="${promotion.name || ""}" required />
+                </div>
+                <div>
+                    <label for="description-${promotion.id}">Description</label>
+                    <input id="description-${promotion.id}" name="description" type="text" value="${promotion.description || ""}" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label for="type-${promotion.id}">Type</label>
+                    <select id="type-${promotion.id}" name="promotion_type">
+                        <option value="1" ${Number(promotion.promotion_type) === 1 ? "selected" : ""}>Percentage</option>
+                        <option value="2" ${Number(promotion.promotion_type) === 2 ? "selected" : ""}>Amount</option>
+                        <option value="3" ${Number(promotion.promotion_type) === 3 ? "selected" : ""}>Free Shipping</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="value-${promotion.id}">Value</label>
+                    <input id="value-${promotion.id}" name="value" type="number" value="${promotion.value ?? ""}" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label for="start-${promotion.id}">Start Date</label>
+                    <input id="start-${promotion.id}" name="start_date" type="date" value="${promotion.start_date ? promotion.start_date.split("T")[0] : ""}" />
+                </div>
+                <div>
+                    <label for="end-${promotion.id}">End Date</label>
+                    <input id="end-${promotion.id}" name="end_date" type="date" value="${promotion.end_date ? promotion.end_date.split("T")[0] : ""}" />
+                </div>
+                <div>
+                    <label for="active-${promotion.id}">Active</label>
+                    <select id="active-${promotion.id}" name="active">
+                        <option value="true" ${isActive ? "selected" : ""}>True</option>
+                        <option value="false" ${!isActive ? "selected" : ""}>False</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Save</button>
+                <button type="button" class="btn-secondary" data-action="cancel">Cancel</button>
+            </div>
+        `;
+
+        editBtn.addEventListener("click", () => {
+            form.style.display = form.style.display === "none" ? "block" : "none";
+        });
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            await handleUpdate(promotion.id, form);
+        });
+
+        form.querySelector('[data-action="cancel"]').addEventListener("click", () => {
+            form.style.display = "none";
+        });
+
+        deleteBtn.addEventListener("click", async () => {
+            await handleDelete(promotion.id);
+        });
+
+        card.appendChild(actions);
+        card.appendChild(form);
+
         promotionList.appendChild(card);
     });
+}
+
+function buildPayloadFromForm(promotionId, form) {
+    const formData = new FormData(form);
+    const payload = {
+        id: promotionId,
+        name: formData.get("name")?.trim(),
+        description: formData.get("description")?.trim() || null,
+        promotion_type: Number(formData.get("promotion_type")),
+        value: formData.get("value") ? Number(formData.get("value")) : null,
+        start_date: formData.get("start_date") || null,
+        end_date: formData.get("end_date") || null,
+        active: formData.get("active") === "true",
+    };
+
+    return payload;
+}
+
+async function handleUpdate(promotionId, form) {
+    hideMessage();
+
+    const payload = buildPayloadFromForm(promotionId, form);
+
+    if (!payload.name) {
+        showMessage("Name is required to update a promotion.", "error");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/${promotionId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Update failed with status ${response.status}`);
+        }
+
+        const updated = await response.json();
+        promotionsCache = promotionsCache.map((promo) =>
+            promo.id === promotionId ? updated : promo
+        );
+
+        renderPromotions(promotionsCache);
+        showMessage("Promotion updated successfully.", "success");
+    } catch (error) {
+        console.error("Update failed:", error);
+        showMessage("An error occurred while updating the promotion.", "error");
+    }
+}
+
+async function handleDelete(promotionId) {
+    hideMessage();
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/${promotionId}`, {
+            method: "DELETE",
+        });
+
+        if (!response.ok && response.status !== 204) {
+            throw new Error(`Delete failed with status ${response.status}`);
+        }
+
+        promotionsCache = promotionsCache.filter((promo) => promo.id !== promotionId);
+        renderPromotions(promotionsCache);
+        showMessage("Promotion deleted successfully.", "success");
+    } catch (error) {
+        console.error("Delete failed:", error);
+        showMessage("An error occurred while deleting the promotion.", "error");
+    }
 }
 
 async function handleSearch() {
@@ -88,6 +252,8 @@ async function handleSearch() {
         const data = await response.json();
         const promotions = Array.isArray(data) ? data : (data.promotions || []);
 
+        promotionsCache = promotions;
+
         if (promotions.length === 0) {
             showMessage("No promotions match the search criteria.", "info");
             return;
@@ -104,6 +270,7 @@ function handleClear() {
     nameFilter.value = "";
     activeFilter.value = "";
     promotionList.innerHTML = "";
+    promotionsCache = [];
     hideMessage();
 }
 
