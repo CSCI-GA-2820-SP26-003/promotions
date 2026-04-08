@@ -40,7 +40,9 @@ def step_impl(context):
 
     # Get a list all of the promotions
     rest_endpoint = f"{context.base_url}/promotions"
+
     context.resp = requests.get(rest_endpoint, timeout=WAIT_TIMEOUT)
+
     expect(context.resp.status_code).equal_to(HTTP_200_OK)
     # and delete them one by one
     for pet in context.resp.json():
@@ -53,11 +55,15 @@ def step_impl(context):
     for row in context.table:
         payload = {
             "name": row["name"],
-            "promotion_type": row["promotion_type"],
+            "promotion_type": int(row["promotion_type"]),
             "start_date": row["start_date"],
             "end_date": row["end_date"],
-            "value": row["value"],
-            "active": row["active"],
+            "value": int(row["value"]),
+            "active": row["active"].lower() == "true",
         }
+
         context.resp = requests.post(rest_endpoint, json=payload, timeout=WAIT_TIMEOUT)
+        print("POST payload:", payload)
+        print("POST status:", context.resp.status_code)
+        print("POST body:", context.resp.text)
         expect(context.resp.status_code).equal_to(HTTP_201_CREATED)

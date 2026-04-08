@@ -60,13 +60,21 @@ promotion_model = promotions_ns.model(
 api.add_namespace(root_ns, path="")
 api.add_namespace(promotions_ns, path="/promotions")
 
+
 ######################################################################
 # UI INDEX PAGE
 ######################################################################
-@app.route("/ui")
+# @app.route("/ui")
+# def index():
+#     """Render UI page"""
+#     return render_template("index.html")
+
+
+@app.route("/")
 def index():
-    """Render UI page"""
-    return render_template("index.html")
+    """Base URL for our service"""
+    return app.send_static_file("index.html")
+
 
 ######################################################################
 # HEALTH ENDPOINT

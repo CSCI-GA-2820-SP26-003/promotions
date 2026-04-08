@@ -168,31 +168,54 @@
 
 <body>
     <h1>Promotions</h1>
-
-    <div class="search-panel">
-        <label for="nameFilter">Name:</label>
-        <input type="text" id="nameFilter" placeholder="Enter promotion name" />
-
-        <label for="activeFilter">Active Status:</label>
-        <select id="activeFilter">
-            <option value="">-- Any --</option>
-            <option value="true">Active</option>
-            <option value="false">Inactive</option>
-        </select>
-
-        <button id="searchBtn" type="button">Search</button>
-        <button id="clearBtn" type="button">Clear</button>
-
-        <span style="border-left: 1px solid #ccc; height: 30px;"></span>
-        <label for="promotionId">ID:</label>
-        <input type="number" id="promotionId" />
-        <button id="retrieveBtn">Retrieve</button>
+    <h2>Create Promotion</h2>
+    <div class="form-row">
+        <div>
+            <label for="pet_promotion_id">Promotion ID:</label>
+            <input type="number" id="pet_promotion_id" />
+        </div>
+        <div>
+            <label for="pet_name">Name:</label>
+            <input type="text" id="pet_name" />
+        </div>
+        <div>
+            <label for="pet_promotion_type">Promotion Type:</label>
+            <select id="pet_promotion_type">
+                <option value="">Select</option>
+                <option value="1">PERCENT_OFF</option>
+                <option value="2">BUY_N_GET_ONE</option>
+                <option value="3">FIXED_DISCOUNT</option>
+                <option value="4">FREE_SHIPPING</option>
+                <option value="5">PAYBACK_PERCENT</option>
+            </select>
+        </div>
+        <div>
+            <label for="pet_value">Value:</label>
+            <input type="number" id="pet_value" />
+        </div>
+        <div>
+            <label for="pet_start_date">Start Date:</label>
+            <input type="date" id="pet_start_date" />
+        </div>
+        <div>
+            <label for="pet_end_date">End Date:</label>
+            <input type="date" id="pet_end_date" />
+        </div>
+        <div>
+            <label for="pet_active">Active:</label>
+            <select id="pet_active">
+                <option value="true">True</option>
+                <option value="false">False</option>
+            </select>
+        </div>
     </div>
 
-    <div id="retrieveResult" class="promotion-list" style="margin-bottom: 20px;"></div>
-    
-    <div id="messageBox" class="message info"></div>
-    <div id="promotionList" class="promotion-list"></div>
+    <button id="create-btn" type="button">Create</button>
+    <button id="clear-btn" type="button">Clear</button>
+    <button id="retrieve-btn" type="button">Retrieve</button>
+
+    <div id="flash_message" class="message info"></div>
+    <div id="search_results" class="promotion-list"></div>
 
     <script src="{{ url_for('static', filename='js/ui_query_test.js') }}"></script>
 </body>
