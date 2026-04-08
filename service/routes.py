@@ -21,7 +21,7 @@ This service implements a REST API that allows you to Create, Read,
 and Delete Promotions
 """
 
-from flask import request, abort, render_template
+from flask import request, abort
 from flask import current_app as app  # Import Flask application
 from flask_restx import Namespace, Resource, fields
 from service import api
@@ -60,13 +60,6 @@ promotion_model = promotions_ns.model(
 api.add_namespace(root_ns, path="")
 api.add_namespace(promotions_ns, path="/promotions")
 
-######################################################################
-# UI INDEX PAGE
-######################################################################
-@app.route("/ui")
-def index():
-    """Render UI page"""
-    return render_template("index.html")
 
 ######################################################################
 # HEALTH ENDPOINT
@@ -98,6 +91,11 @@ class HealthResource(Resource):
 #             "version": "1.0",
 #             "paths": "/promotions",
 #         }, status.HTTP_200_OK
+
+
+@app.route("/")
+def index():
+    return app.send_static_file("index.html")
 
 
 ######################################################################
