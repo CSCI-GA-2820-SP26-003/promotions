@@ -88,8 +88,22 @@ function renderPromotions(promotions) {
         deleteBtn.textContent = "Delete";
         deleteBtn.className = "btn-danger";
 
+        const activateBtn = document.createElement("button");
+        activateBtn.textContent = "Activate";
+        activateBtn.className = "btn-primary";
+
+        const deactivateBtn = document.createElement("button");
+        deactivateBtn.textContent = "Deactivate";
+        deactivateBtn.className = "btn-danger";
+
         actions.appendChild(editBtn);
         actions.appendChild(deleteBtn);
+
+        if (isActive) {
+            actions.appendChild(deactivateBtn);
+        } else {
+            actions.appendChild(activateBtn);
+        }
 
         const form = document.createElement("form");
         form.className = "edit-form";
@@ -158,6 +172,14 @@ function renderPromotions(promotions) {
 
         deleteBtn.addEventListener("click", async () => {
             await handleDelete(promotion.id);
+        });
+
+        activateBtn.addEventListener("click", async () => {
+            await handleActivate(promotion.id);
+        });
+
+        deactivateBtn.addEventListener("click", async () => {
+            await handleDeactivate(promotion.id);
         });
 
         card.appendChild(actions);
@@ -240,6 +262,58 @@ async function handleDelete(promotionId) {
     }
 }
 
+async function handleActivate(promotionId) {
+    hideMessage();
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/${promotionId}/activate`, {
+            method: "PUT"
+        });
+
+        if (!response.ok) {
+            throw new Error();
+        }
+
+        const updated = await response.json();
+
+        promotionsCache = promotionsCache.map(p =>
+            p.id === promotionId ? updated : p
+        );
+
+        renderPromotions(promotionsCache);
+        showMessage("Activated successfully", "success");
+
+    } catch (error) {
+        showMessage("Activate failed", "error");
+    }
+}
+
+async function handleDeactivate(promotionId) {
+    hideMessage();
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/${promotionId}/deactivate`, {
+            method: "PUT"
+        });
+
+        if (!response.ok) {
+            throw new Error();
+        }
+
+        const updated = await response.json();
+
+        promotionsCache = promotionsCache.map(p =>
+            p.id === promotionId ? updated : p
+        );
+
+        renderPromotions(promotionsCache);
+        showMessage("Deactivated successfully", "success");
+
+    } catch (error) {
+        showMessage("Deactivate failed", "error");
+    }
+}
+
 async function handleSearch() {
     hideMessage();
     search_results.innerHTML = "";
@@ -288,9 +362,20 @@ async function handleSearch() {
     }
 }
 
+// function handleClear() {
+//     nameFilter.value = "";
+//     activeFilter.value = "";
+//     search_results.innerHTML = "";
+//     promotionsCache = [];
+//     hideMessage();
+// }
+
 function handleClear() {
-    nameFilter.value = "";
-    activeFilter.value = "";
+    createName.value = "";
+    createType.value = "";
+    createValue.value = "";
+    createStartDate.value = "";
+    createEndDate.value = "";
     search_results.innerHTML = "";
     promotionsCache = [];
     hideMessage();
@@ -344,11 +429,11 @@ async function handleCreate() {
 
     const payload = {
         name: createName.value.trim(),
-        promotion_type: typeMap[createType.value],
+        promotion_type: Number(createType.value),
         value: createValue.value ? Number(createValue.value) : null,
         start_date: createStartDate.value || null,
         end_date: createEndDate.value || null,
-        active: true
+        active: document.getElementById("pet_active").value === "true"
     };
 
     if (!payload.name) {
@@ -405,7 +490,7 @@ async function handleCreate() {
     }
 }
 
-searchBtn.addEventListener("click", handleSearch);
+// searchBtn.addEventListener("click", handleSearch);
 clearBtn.addEventListener("click", handleClear);
-retrieveBtn.addEventListener("click", handleRetrieve);
+// retrieveBtn.addEventListener("click", handleRetrieve);
 createBtn.addEventListener("click", handleCreate);

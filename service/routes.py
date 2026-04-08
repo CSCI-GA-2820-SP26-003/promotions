@@ -64,9 +64,12 @@ api.add_namespace(promotions_ns, path="/promotions")
 ######################################################################
 # UI INDEX PAGE
 ######################################################################
-@app.route("/")
+# @app.route("/")
+# def index():
+#     """Render UI page"""
+#     return render_template("index.html")
+@app.route("/ui")
 def index():
-    """Render UI page"""
     return render_template("index.html")
 
 
