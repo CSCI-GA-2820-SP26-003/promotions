@@ -467,3 +467,13 @@ class TestPromotionService(TestCase):
         """It should return None when promotion is not found"""
         result = Promotion.find(999999)
         self.assertIsNone(result)
+
+    def test_index(self):
+        """Test the root URL"""
+        resp = self.client.get("/")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertTrue(resp.is_json)
+
+        data = resp.get_json()
+        self.assertEqual(data["name"], "Promotions REST API Service")
+        self.assertEqual(data["version"], "1.0")
