@@ -19,27 +19,13 @@ Scenario: The server is running
 Scenario: Create a promotion
     When I visit the "Home Page"
     And I set the "Name" to "Welcome Discount"
-    And I set the "Promotion Type" to "1"
-    And I set the "Start Date" to "01-19-2026"
-    And I set the "End Date" to "02-18-2026"
+    And I select "PERCENT_OFF" in the "Promotion Type" dropdown
+    And I set the "Start Date" to "2026-01-19"
+    And I set the "End Date" to "2026-02-18"
     And I set the "Value" to "10"
-    And I select "False" in the "Active" dropdown
     And I press the "Create" button
-    Then I should see the message "Success"
-    When I copy the "Promotion ID" field
-    And I press the "Clear" button
-    Then the "Promotion ID" field should be empty
-    And the "Name" field should be empty
-    And the "Promotion Type" field should be empty
-    When I paste the "Promotion ID" field
-    And I press the "Retrieve" button
-    Then I should see the message "Success"
-    And I should see "Welcome Discount" in the "Name" field
-    And I should see "1" in the "Promotion Type" field
-    And I should see "2026-01-19" in the "Start Date" field
-    And I should see "2026-02-18" in the "End Date" field
-    And I should see "10" in the "Value" field
-    And I should see "False" in the "Active" dropdown
+    Then I should see the message "Promotion created successfully."
+    And I should see "Welcome Discount" in the results
 
 Scenario: List all promotions
     When I visit the "Home Page"

@@ -1,40 +1,59 @@
 const API_BASE_URL = "/promotions";
+//create buttons
+const createBtn = document.getElementById("create-btn");
+const createName = document.getElementById("pet_name");
+const createType = document.getElementById("pet_promotion_type");
+const createValue = document.getElementById("pet_value");
+const createStartDate = document.getElementById("pet_start_date");
+const createEndDate = document.getElementById("pet_end_date");
 
 const nameFilter = document.getElementById("nameFilter");
 const activeFilter = document.getElementById("activeFilter");
-const searchBtn = document.getElementById("searchBtn");
-const clearBtn = document.getElementById("clearBtn");
-const promotionList = document.getElementById("promotionList");
-const messageBox = document.getElementById("messageBox");
+const searchBtn = document.getElementById("search-btn");
+const clearBtn = document.getElementById("clear-btn");
+const search_results = document.getElementById("search_results");
+const flash_message = document.getElementById("flash_message");
 const promotionIdInput = document.getElementById("promotionId");
-const retrieveBtn = document.getElementById("retrieveBtn");
+const retrieveBtn = document.getElementById("retrieve-btn");
 const retrieveResult = document.getElementById("retrieveResult");
 
 let promotionsCache = [];
 
 function showMessage(text, type = "info") {
-    messageBox.textContent = text;
-    messageBox.className = `message ${type}`;
-    messageBox.style.display = "block";
+    flash_message.textContent = text;
+    flash_message.className = `message ${type}`;
+    flash_message.style.display = "block";
 }
 
 function hideMessage() {
-    messageBox.style.display = "none";
-    messageBox.textContent = "";
+    flash_message.style.display = "none";
+    flash_message.textContent = "";
 }
+
+// function formatPromotionType(type) {
+//     const typeMap = {
+//         1: "Percentage",
+//         2: "Amount",
+//         3: "Free Shipping"
+//     };
+
+//     return typeMap[type] || type || "N/A";
+// }
 
 function formatPromotionType(type) {
     const typeMap = {
-        1: "Percentage",
-        2: "Amount",
-        3: "Free Shipping"
+        PERCENT_OFF: "Percentage",
+        BUY_N_GET_ONE: "Buy N Get One",
+        FIXED_DISCOUNT: "Fixed Discount",
+        FREE_SHIPPING: "Free Shipping",
+        PAYBACK_PERCENT: "Payback Percent"
     };
 
     return typeMap[type] || type || "N/A";
 }
 
 function renderPromotions(promotions) {
-    promotionList.innerHTML = "";
+    search_results.innerHTML = "";
 
     promotions.forEach((promotion) => {
         const card = document.createElement("div");
@@ -144,7 +163,7 @@ function renderPromotions(promotions) {
         card.appendChild(actions);
         card.appendChild(form);
 
-        promotionList.appendChild(card);
+        search_results.appendChild(card);
     });
 }
 
@@ -223,7 +242,7 @@ async function handleDelete(promotionId) {
 
 async function handleSearch() {
     hideMessage();
-    promotionList.innerHTML = "";
+    search_results.innerHTML = "";
 
     const nameValue = nameFilter.value.trim();
     const activeValue = activeFilter.value;
@@ -272,7 +291,7 @@ async function handleSearch() {
 function handleClear() {
     nameFilter.value = "";
     activeFilter.value = "";
-    promotionList.innerHTML = "";
+    search_results.innerHTML = "";
     promotionsCache = [];
     hideMessage();
 }
@@ -312,8 +331,81 @@ async function handleRetrieve() {
         showMessage("Error retrieving promotion.", "error");
     }
 }
+async function handleCreate() {
+    hideMessage();
 
+    const typeMap = {
+        PERCENT_OFF: 1,
+        BUY_N_GET_ONE: 2,
+        FIXED_DISCOUNT: 3,
+        FREE_SHIPPING: 4,
+        PAYBACK_PERCENT: 5
+    };
+
+    const payload = {
+        name: createName.value.trim(),
+        promotion_type: typeMap[createType.value],
+        value: createValue.value ? Number(createValue.value) : null,
+        start_date: createStartDate.value || null,
+        end_date: createEndDate.value || null,
+        active: true
+    };
+
+    if (!payload.name) {
+        showMessage("Name is required.", "error");
+        return;
+    }
+    if (!payload.value) {
+        showMessage("Value is required.", "error");
+        return;
+    }
+
+    if (!createStartDate.value || !createEndDate.value) {
+        showMessage("Start date and end date are required.", "error");
+        return;
+    }
+
+    try {
+        const response = await fetch(API_BASE_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+            let msg = "Create failed";
+            try {
+                const errorData = await response.json();
+                msg = errorData.message || msg;
+            } catch (e) {
+                const text = await response.text();
+                msg = text;
+            }
+            throw new Error(msg);
+        }
+
+        const created = await response.json();
+        showMessage("Promotion created successfully.", "success");
+
+        // reset form
+        createName.value = "";
+        createValue.value = "";
+        createStartDate.value = "";
+        createEndDate.value = "";
+
+        // update UI
+        promotionsCache.push(created);
+        renderPromotions(promotionsCache);
+
+    } catch (error) {
+        console.error("Create failed:", error);
+        showMessage(error.message, "error");
+    }
+}
 
 searchBtn.addEventListener("click", handleSearch);
 clearBtn.addEventListener("click", handleClear);
 retrieveBtn.addEventListener("click", handleRetrieve);
+createBtn.addEventListener("click", handleCreate);

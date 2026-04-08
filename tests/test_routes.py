@@ -88,7 +88,7 @@ class TestPromotionService(TestCase):
 
         data = response.get_json()
         self.assertTrue(data["active"])
-        
+
     def test_activate_promotion_not_found(self):
         """It should return 404 when activating a Promotion that does not exist"""
         response = self.client.put(f"{BASE_URL}/999999/activate")
@@ -113,7 +113,7 @@ class TestPromotionService(TestCase):
         """It should return 404 when deactivating a Promotion that does not exist"""
         response = self.client.put(f"{BASE_URL}/999999/deactivate")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        
+
     # def test_index(self):
     # """It should call the home page"""
     # resp = self.client.get("/")
@@ -157,11 +157,11 @@ class TestPromotionService(TestCase):
 
     def test_ui_route(self):
         """It should load the UI page"""
-        resp = self.client.get("/ui")
+        resp = self.client.get("/")
 
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertIn(b"Promotions", resp.data)
-    
+
     def _create_promotions(self, count: int = 1) -> list:
         """Factory method to create promotions in bulk"""
         promotions = []
