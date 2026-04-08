@@ -62,6 +62,18 @@ api.add_namespace(promotions_ns, path="/promotions")
 
 
 ######################################################################
+# UI INDEX PAGE
+######################################################################
+@app.route("/")
+def index():
+    """Render UI page"""
+    return render_template("index.html")
+# @app.route("/ui")
+# def index():
+#     return render_template("index.html")
+
+
+######################################################################
 # HEALTH ENDPOINT
 ######################################################################
 @root_ns.route("/health")
