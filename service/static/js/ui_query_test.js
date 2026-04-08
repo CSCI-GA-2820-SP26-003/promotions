@@ -6,6 +6,9 @@ const searchBtn = document.getElementById("searchBtn");
 const clearBtn = document.getElementById("clearBtn");
 const promotionList = document.getElementById("promotionList");
 const messageBox = document.getElementById("messageBox");
+const promotionIdInput = document.getElementById("promotionId");
+const retrieveBtn = document.getElementById("retrieveBtn");
+const retrieveResult = document.getElementById("retrieveResult");
 
 let promotionsCache = [];
 
@@ -274,5 +277,43 @@ function handleClear() {
     hideMessage();
 }
 
+async function handleRetrieve() {
+    hideMessage();
+    retrieveResult.innerHTML = "";
+
+    const id = promotionIdInput.value.trim();
+
+    if (!id) {
+        showMessage("Please enter a promotion ID.", "info");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/${id}`);
+
+        if (response.status === 404) {
+            showMessage(`Promotion with ID ${id} was not found.`, "error");
+            return;
+        }
+
+        const promotion = await response.json();
+        retrieveResult.innerHTML = `
+            <div class="promotion-card">
+                <h3>${promotion.name || "No Name"}</h3>
+                <p><strong>ID:</strong> ${promotion.id}</p>
+                <p><strong>Description:</strong> ${promotion.description || "N/A"}</p>
+                <p><strong>Type:</strong> ${formatPromotionType(promotion.promotion_type)}</p>
+                <p><strong>Status:</strong> ${promotion.active ? "Active" : "Inactive"}</p>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error("Retrieve failed:", error);
+        showMessage("Error retrieving promotion.", "error");
+    }
+}
+
+
 searchBtn.addEventListener("click", handleSearch);
 clearBtn.addEventListener("click", handleClear);
+retrieveBtn.addEventListener("click", handleRetrieve);
