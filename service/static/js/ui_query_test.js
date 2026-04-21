@@ -13,7 +13,7 @@ const searchBtn = document.getElementById("search-btn");
 const clearBtn = document.getElementById("clear-btn");
 const search_results = document.getElementById("search_results");
 const flash_message = document.getElementById("flash_message");
-const promotionIdInput = document.getElementById("promotionId");
+const promotionIdInput = document.getElementById("pet_promotion_id");
 const retrieveBtn = document.getElementById("retrieve-btn");
 const retrieveResult = document.getElementById("retrieveResult");
 
@@ -383,6 +383,11 @@ function handleClear() {
 
 async function handleRetrieve() {
     hideMessage();
+    if (!retrieveResult) {
+        showMessage("Retrieve results area is missing from the page.", "error");
+        return;
+    }
+
     retrieveResult.innerHTML = "";
 
     const id = promotionIdInput.value.trim();
@@ -490,7 +495,7 @@ async function handleCreate() {
     }
 }
 
-// searchBtn.addEventListener("click", handleSearch);
+searchBtn.addEventListener("click", handleSearch);
 clearBtn.addEventListener("click", handleClear);
-// retrieveBtn.addEventListener("click", handleRetrieve);
+retrieveBtn.addEventListener("click", handleRetrieve);
 createBtn.addEventListener("click", handleCreate);
