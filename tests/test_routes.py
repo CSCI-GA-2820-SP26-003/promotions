@@ -157,10 +157,10 @@ class TestPromotionService(TestCase):
 
     def test_ui_route(self):
         """It should load the UI page"""
-        resp = self.client.get("/")
+        resp = self.client.get("/ui")
 
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertIn(b"Promotions", resp.data)
+        self.assertIn(b"Promotions UI", resp.data)
 
     def _create_promotions(self, count: int = 1) -> list:
         """Factory method to create promotions in bulk"""
