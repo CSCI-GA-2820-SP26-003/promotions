@@ -21,7 +21,7 @@ This service implements a REST API that allows you to Create, Read,
 and Delete Promotions
 """
 
-from flask import request, abort
+from flask import request, abort, render_template
 from flask import current_app as app  # Import Flask application
 from flask_restx import Namespace, Resource, fields
 from service import api
@@ -64,13 +64,10 @@ api.add_namespace(promotions_ns, path="/promotions")
 ######################################################################
 # UI INDEX PAGE
 ######################################################################
-@app.route("/")
-def index():
-    """Render UI page"""
+@app.route("/ui")
+def ui_index():
+    """Render the UI page"""
     return render_template("index.html")
-# @app.route("/ui")
-# def index():
-#     return render_template("index.html")
 
 
 ######################################################################
@@ -87,28 +84,6 @@ class HealthResource(Resource):
         """
         app.logger.info("Health check requested")
         return {"status": "healthy"}, status.HTTP_200_OK
-
-
-######################################################################
-# GET INDEX
-######################################################################
-@root_ns.route("/")
-class RootResource(Resource):
-    """Root resource"""
-
-    def get(self):
-        """Root URL response"""
-        return {
-            "name": "Promotions REST API Service",
-            "version": "1.0",
-            "paths": "/promotions",
-            "ui": "/ui",
-        }, status.HTTP_200_OK
-
-
-@app.route("/ui")
-def ui_index():
-    return app.send_static_file("index.html")
 
 
 ######################################################################
