@@ -1,0 +1,60 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: promotions
+spec:
+  workspaces:
+    - name: shared-workspace
+
+  params:
+    - name: image-name
+      type: string
+    - name: manifest-dir
+      type: string
+      default: k8s
+    - name: base-url
+      type: string
+      default: http://promotions:8080
+
+  tasks:
+    - name: pylint
+      taskRef:
+        name: pylint
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+    - name: pytest-env
+      taskRef:
+        name: pytest-env
+      runAfter:
+        - pylint
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+    - name: deploy-image
+      taskRef:
+        name: deploy-image
+      runAfter:
+        - pytest-env
+      params:
+        - name: image-name
+          value: $(params.image-name)
+        - name: manifest-dir
+          value: $(params.manifest-dir)
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+    - name: behave-test
+      taskRef:
+        name: behave
+      runAfter:
+        - deploy-image
+      params:
+        - name: base-url
+          value: $(params.base-url)
+      workspaces:
+        - name: source
+          workspace: shared-workspace
