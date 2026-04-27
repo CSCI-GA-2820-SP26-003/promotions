@@ -12,6 +12,9 @@ spec:
       description: The reference (branch or ref)
       name: GIT_REF
       type: string
+    - name: base-url
+      type: string
+      default: http://promotions:8080
   tasks:
     - name: git-clone
       params:
@@ -56,6 +59,17 @@ spec:
         resolver: cluster
       workspaces:
         - name: output
+          workspace: pipeline-workspace
+    - name: behave-test
+      taskRef:
+        name: behave
+      runAfter:
+        - git-clone
+      params:
+        - name: base-url
+          value: $(params.base-url)
+      workspaces:
+        - name: source
           workspace: pipeline-workspace
   workspaces:
     - name: pipeline-workspace
