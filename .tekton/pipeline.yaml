@@ -1,60 +1,75 @@
-apiVersion: tekton.dev/v1beta1
+apiVersion: tekton.dev/v1
 kind: Pipeline
 metadata:
-  name: promotions
+  name: promotion-cd-pipeline
 spec:
-  workspaces:
-    - name: shared-workspace
-
   params:
-    - name: image-name
+    - default: 'https://github.com/CSCI-GA-2820-SP26-003/promotions.git'
+      description: The URL to the git repo
+      name: GIT_REPO
       type: string
-    - name: manifest-dir
+    - default: master
+      description: The reference (branch or ref)
+      name: GIT_REF
       type: string
-      default: k8s
     - name: base-url
       type: string
       default: http://promotions:8080
-
   tasks:
-    - name: pylint
-      taskRef:
-        name: pylint
-      workspaces:
-        - name: source
-          workspace: shared-workspace
-
-    - name: pytest-env
-      taskRef:
-        name: pytest-env
-      runAfter:
-        - pylint
-      workspaces:
-        - name: source
-          workspace: shared-workspace
-
-    - name: deploy-image
-      taskRef:
-        name: deploy-image
-      runAfter:
-        - pytest-env
+    - name: git-clone
       params:
-        - name: image-name
-          value: $(params.image-name)
-        - name: manifest-dir
-          value: $(params.manifest-dir)
+        - name: CRT_FILENAME
+          value: ca-bundle.crt
+        - name: HTTP_PROXY
+          value: ''
+        - name: HTTPS_PROXY
+          value: ''
+        - name: NO_PROXY
+          value: ''
+        - name: SUBDIRECTORY
+          value: ''
+        - name: USER_HOME
+          value: /home/git
+        - name: DELETE_EXISTING
+          value: 'true'
+        - name: VERBOSE
+          value: 'false'
+        - name: SSL_VERIFY
+          value: 'true'
+        - name: URL
+          value: $(params.GIT_REPO)
+        - name: REVISION
+          value: $(params.GIT_REF)
+        - name: REFSPEC
+          value: ''
+        - name: SUBMODULES
+          value: 'true'
+        - name: DEPTH
+          value: '1'
+        - name: SPARSE_CHECKOUT_DIRECTORIES
+          value: ''
+      taskRef:
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: namespace
+            value: openshift-pipelines
+        resolver: cluster
       workspaces:
-        - name: source
-          workspace: shared-workspace
-
+        - name: output
+          workspace: pipeline-workspace
     - name: behave-test
       taskRef:
         name: behave
       runAfter:
-        - deploy-image
+        - git-clone
       params:
         - name: base-url
           value: $(params.base-url)
       workspaces:
         - name: source
-          workspace: shared-workspace
+          workspace: pipeline-workspace
+  workspaces:
+    - name: pipeline-workspace

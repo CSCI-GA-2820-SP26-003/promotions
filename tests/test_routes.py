@@ -162,6 +162,18 @@ class TestPromotionService(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertIn(b"Promotions UI", resp.data)
 
+    def test_ui_retrieve_controls(self):
+        """It should render the retrieve controls expected by the UI script"""
+        resp = self.client.get("/ui")
+
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertIn(b'id="pet_promotion_id"', resp.data)
+        self.assertIn(b'id="retrieve-btn"', resp.data)
+        self.assertIn(b'id="retrieveResult"', resp.data)
+
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertIn(b"Promotions UI", resp.data)
+
     def _create_promotions(self, count: int = 1) -> list:
         """Factory method to create promotions in bulk"""
         promotions = []

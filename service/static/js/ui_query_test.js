@@ -1,21 +1,33 @@
 const API_BASE_URL = "/promotions";
+
+function getElementByIds(ids) {
+    for (const id of ids) {
+        const element = document.getElementById(id);
+        if (element) {
+            return element;
+        }
+    }
+
+    return null;
+}
+
 //create buttons
 const createBtn = document.getElementById("create-btn");
-const createName = document.getElementById("pet_name");
-const createType = document.getElementById("pet_promotion_type");
-const createValue = document.getElementById("pet_value");
-const createStartDate = document.getElementById("pet_start_date");
-const createEndDate = document.getElementById("pet_end_date");
+const createName = getElementByIds(["pet_name", "promotion_name"]);
+const createType = getElementByIds(["pet_promotion_type", "promotion_available"]);
+const createValue = getElementByIds(["pet_value"]);
+const createStartDate = getElementByIds(["pet_start_date"]);
+const createEndDate = getElementByIds(["pet_end_date"]);
 
-const nameFilter = document.getElementById("nameFilter");
-const activeFilter = document.getElementById("activeFilter");
+const nameFilter = getElementByIds(["nameFilter"]);
+const activeFilter = getElementByIds(["activeFilter"]);
 const searchBtn = document.getElementById("search-btn");
 const clearBtn = document.getElementById("clear-btn");
 const search_results = document.getElementById("search_results");
 const flash_message = document.getElementById("flash_message");
-const promotionIdInput = document.getElementById("promotionId");
+const promotionIdInput = getElementByIds(["pet_promotion_id", "promotion_id"]);
 const retrieveBtn = document.getElementById("retrieve-btn");
-const retrieveResult = document.getElementById("retrieveResult");
+const retrieveResult = getElementByIds(["retrieveResult"]);
 
 let promotionsCache = [];
 
@@ -318,8 +330,8 @@ async function handleSearch() {
     hideMessage();
     search_results.innerHTML = "";
 
-    const nameValue = nameFilter.value.trim();
-    const activeValue = activeFilter.value;
+    const nameValue = nameFilter ? nameFilter.value.trim() : "";
+    const activeValue = activeFilter ? activeFilter.value : "";
 
     const params = new URLSearchParams();
 
@@ -371,11 +383,21 @@ async function handleSearch() {
 // }
 
 function handleClear() {
-    createName.value = "";
-    createType.value = "";
-    createValue.value = "";
-    createStartDate.value = "";
-    createEndDate.value = "";
+    if (createName) {
+        createName.value = "";
+    }
+    if (createType) {
+        createType.value = "";
+    }
+    if (createValue) {
+        createValue.value = "";
+    }
+    if (createStartDate) {
+        createStartDate.value = "";
+    }
+    if (createEndDate) {
+        createEndDate.value = "";
+    }
     search_results.innerHTML = "";
     promotionsCache = [];
     hideMessage();
@@ -383,9 +405,22 @@ function handleClear() {
 
 async function handleRetrieve() {
     hideMessage();
-    retrieveResult.innerHTML = "";
+    let resultsArea = retrieveResult;
 
-    const id = promotionIdInput.value.trim();
+    if (!resultsArea) {
+        resultsArea = document.createElement("div");
+        resultsArea.id = "retrieveResult";
+        resultsArea.className = "promotion-list";
+
+        const anchor = flash_message || search_results;
+        if (anchor && anchor.parentNode) {
+            anchor.parentNode.insertBefore(resultsArea, anchor.nextSibling);
+        }
+    }
+
+    resultsArea.innerHTML = "";
+
+    const id = promotionIdInput ? promotionIdInput.value.trim() : "";
 
     if (!id) {
         showMessage("Please enter a promotion ID.", "info");
@@ -401,7 +436,7 @@ async function handleRetrieve() {
         }
 
         const promotion = await response.json();
-        retrieveResult.innerHTML = `
+        resultsArea.innerHTML = `
             <div class="promotion-card">
                 <h3>${promotion.name || "No Name"}</h3>
                 <p><strong>ID:</strong> ${promotion.id}</p>
@@ -418,6 +453,11 @@ async function handleRetrieve() {
 }
 async function handleCreate() {
     hideMessage();
+
+    if (!createName || !createType || !createValue || !createStartDate || !createEndDate) {
+        showMessage("Create form is not fully configured on this page.", "error");
+        return;
+    }
 
     const typeMap = {
         PERCENT_OFF: 1,
@@ -490,7 +530,18 @@ async function handleCreate() {
     }
 }
 
-// searchBtn.addEventListener("click", handleSearch);
-clearBtn.addEventListener("click", handleClear);
-// retrieveBtn.addEventListener("click", handleRetrieve);
-createBtn.addEventListener("click", handleCreate);
+if (searchBtn) {
+    searchBtn.addEventListener("click", handleSearch);
+}
+
+if (clearBtn) {
+    clearBtn.addEventListener("click", handleClear);
+}
+
+if (retrieveBtn) {
+    retrieveBtn.addEventListener("click", handleRetrieve);
+}
+
+if (createBtn) {
+    createBtn.addEventListener("click", handleCreate);
+}
