@@ -7,7 +7,8 @@ import unittest
 from wsgi import app
 from service.common import status
 
-BASE_URL = "/api/promotions"
+
+BASE_URL = "/promotions"
 
 
 class TestCoverageBoost(unittest.TestCase):
@@ -23,4 +24,6 @@ class TestCoverageBoost(unittest.TestCase):
             data='{"name":"bad"}',
             content_type="text/plain",
         )
-        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+        self.assertEqual(
+            response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE
+        )
