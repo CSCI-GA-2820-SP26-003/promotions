@@ -18,12 +18,12 @@ Package for the application models and service routes
 This module creates and configures the Flask app and sets up the logging
 and SQL database
 """
+
 import sys
 from flask import Flask
 from flask_restx import Api
 from service import config
 from service.common import log_handlers
-
 
 ############################################################
 # Initialize the Flask instance
@@ -33,6 +33,7 @@ api = Api(
     version="1.0.0",
     description="Promotions service API",
     doc="/apidocs",
+    prefix="/api",
 )
 
 
@@ -41,7 +42,7 @@ def api_root():
     return {
         "name": "Promotions REST API Service",
         "version": "1.0",
-        "resources": {"promotions": "/promotions"},
+        "resources": {"promotions": "/api/promotions"},
     }, 200
 
 

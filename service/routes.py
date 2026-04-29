@@ -21,7 +21,7 @@ This service implements a REST API that allows you to Create, Read,
 and Delete Promotions
 """
 
-from flask import request, abort, render_template
+from flask import request, abort
 from flask import current_app as app  # Import Flask application
 from flask_restx import Namespace, Resource, fields
 from service import api
@@ -57,33 +57,26 @@ promotion_model = promotions_ns.model(
 ######################################################################
 # Add Namespace
 ######################################################################
-api.add_namespace(root_ns, path="")
+api.add_namespace(root_ns, path="/")
 api.add_namespace(promotions_ns, path="/promotions")
 
 
 ######################################################################
 # UI INDEX PAGE
 ######################################################################
-@app.route("/ui")
-def ui_index():
+@app.route("/")
+def index():
     """Render the UI page"""
-    return render_template("index.html")
+    return app.send_static_file("index.html")
 
 
 ######################################################################
 # HEALTH ENDPOINT
 ######################################################################
-@root_ns.route("/health")
-class HealthResource(Resource):
+@app.route("/health")
+def health():
     """Health check endpoint"""
-
-    def get(self):
-        """
-        Health check endpoint
-        Returns the health status of the service
-        """
-        app.logger.info("Health check requested")
-        return {"status": "healthy"}, status.HTTP_200_OK
+    return {"status": "OK"}, status.HTTP_200_OK
 
 
 ######################################################################
@@ -203,7 +196,7 @@ class PromotionCollection(Resource):
         promotion.deserialize(data)
         promotion.create()
 
-        location_url = f"{request.host_url.rstrip('/')}/promotions/{promotion.id}"
+        location_url = f"{request.host_url.rstrip('/')}/api/promotions/{promotion.id}"
 
         return (
             promotion.serialize(),

@@ -177,7 +177,7 @@ spec:
           #!/bin/bash
           set -e
 
-          echo Applying manifests in $(params.manifest-dir) directory
+          echo Applying manifests in $(inputs.params.manifest-dir) directory
 
           echo "**********************************************************************"
           echo "Installing YQ..."
@@ -186,19 +186,15 @@ spec:
           chmod a+x /usr/bin/yq
 
           echo "*********************  DEPLOYMENT  ***********************"
-          echo "Deploying $(params.image-name) ..."
+          echo "Deploying $(inputs.params.image-name) ..."
 
-          yq -e -i '.spec.template.spec.containers[0].image="$(params.image-name)"' $(params.manifest-dir)/deployment.yaml
-          cat $(params.manifest-dir)/deployment.yaml
+          yq -e -i '.spec.template.spec.containers[0].image="$(inputs.params.image-name)"' $(inputs.params.manifest-dir)/deployment.yaml
+          cat $(inputs.params.manifest-dir)/deployment.yaml
 
           echo "************************************************************"
           echo "OC APPLY..."
-          oc apply -f $(params.manifest-dir)/deployment.yaml
-          oc apply -f $(params.manifest-dir)/service.yaml
-
-          echo "************************************************************"
-          echo "Waiting for rollout to complete..."
-          oc rollout status deployment/promotions --timeout=120s
+          oc apply -f $(inputs.params.manifest-dir)/deployment.yaml
+          oc apply -f $(inputs.params.manifest-dir)/service.yaml
 
           echo "************************************************************"
           sleep 3
