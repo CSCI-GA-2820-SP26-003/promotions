@@ -39,7 +39,7 @@ def step_impl(context):
     """Delete all Promotions and load new ones"""
 
     # Get a list all of the promotions
-    rest_endpoint = f"{context.base_url}/promotions"
+    rest_endpoint = f"{context.base_url}/api/promotions"
 
     context.resp = requests.get(rest_endpoint, timeout=WAIT_TIMEOUT)
 

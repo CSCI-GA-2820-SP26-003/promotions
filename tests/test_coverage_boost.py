@@ -8,7 +8,7 @@ from wsgi import app
 from service.common import status
 
 
-BASE_URL = "/promotions"
+BASE_URL = "/api/promotions"
 
 
 class TestCoverageBoost(unittest.TestCase):
