@@ -2,8 +2,15 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: promotions
+  labels:
+    app: promotions
 spec:
   replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: promotions
@@ -12,15 +19,30 @@ spec:
       labels:
         app: promotions
     spec:
+      restartPolicy: Always
       containers:
-        - name: promotions
-          image: promotions:latest
-          ports:
-            - containerPort: 5000
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "250m"
-            limits:
-              memory: "256Mi"
-              cpu: "500m"
+      - name: promotions
+        image: cluster-registry:5000/promotions:1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        env:
+          - name: DATABASE_URI
+            valueFrom:
+              secretKeyRef:
+                name: postgres-creds
+                key: DATABASE_URI
+        resources:
+          limits:
+            cpu: "0.25"
+            memory: "128Mi"
+          requests:
+            cpu: "0.10"
+            memory: "64Mi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
