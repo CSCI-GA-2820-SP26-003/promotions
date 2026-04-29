@@ -33,7 +33,7 @@ from .factories import PromotionFactory
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
-BASE_URL = "/promotions"
+BASE_URL = "/api/promotions"
 
 
 ######################################################################
@@ -139,7 +139,7 @@ class TestPromotionService(TestCase):
 
     def test_405_returns_json(self):
         """Test 405 returns"""
-        resp = self.client.put("/promotions")
+        resp = self.client.put("/api/promotions")
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertTrue(resp.is_json)
 

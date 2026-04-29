@@ -1,4 +1,4 @@
-const API_BASE_URL = "/promotions";
+const API_BASE_URL = "/api/promotions";
 
 function getElementByIds(ids) {
     for (const id of ids) {

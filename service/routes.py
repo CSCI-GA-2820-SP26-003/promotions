@@ -58,8 +58,7 @@ promotion_model = promotions_ns.model(
 # Add Namespace
 ######################################################################
 api.add_namespace(root_ns, path="")
-api.add_namespace(promotions_ns, path="/promotions")
-
+api.add_namespace(promotions_ns, path="/api/promotions")
 
 ######################################################################
 # UI INDEX PAGE
@@ -203,8 +202,7 @@ class PromotionCollection(Resource):
         promotion.deserialize(data)
         promotion.create()
 
-        location_url = f"{request.host_url.rstrip('/')}/promotions/{promotion.id}"
-
+        location_url = f"{request.host_url.rstrip('/')}/api/promotions/{promotion.id}"
         return (
             promotion.serialize(),
             status.HTTP_201_CREATED,

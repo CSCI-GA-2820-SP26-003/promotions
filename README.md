@@ -68,11 +68,11 @@ tests/                     - test cases package
 | Method   | Endpoint                     | Description                    |
 | -------- | ---------------------------- | ------------------------------ |
 | `GET`    | `/`                          | Root |
-| `POST`   | `/promotions`                | Create a new promotion         |
-| `GET`    | `/promotions`                | List all promotions            |
-| `GET`    | `/promotions/<promotion_id>` | Retrieve a promotion by ID     |
-| `PUT`    | `/promotions/<promotion_id>` | Update a promotion by ID       |
-| `DELETE` | `/promotions/<promotion_id>` | Delete a promotion by ID       |
+| `POST`   | `/api/promotions`                | Create a new promotion         |
+| `GET`    | `/api/promotions`                | List all promotions            |
+| `GET`    | `/api/promotions/<promotion_id>` | Retrieve a promotion by ID     |
+| `PUT`    | `/api/promotions/<promotion_id>` | Update a promotion by ID       |
+| `DELETE` | `/api/promotions/<promotion_id>` | Delete a promotion by ID       |
 
 
 

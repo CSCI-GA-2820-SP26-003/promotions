@@ -41,7 +41,7 @@ def api_root():
     return {
         "name": "Promotions REST API Service",
         "version": "1.0",
-        "resources": {"promotions": "/promotions"},
+        "resources": {"promotions": "/api/promotions"},
     }, 200
 
 
