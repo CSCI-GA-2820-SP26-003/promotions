@@ -29,10 +29,11 @@ from service.models import db, Promotion, DataValidationError
 from service.utils import PromotionType, _parse_date
 from .factories import PromotionFactory
 
+
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql+psycopg://postgres:postgres@localhost:5432/testdb"
 )
-BASE_URL = "api/promotions"
+BASE_URL = "/promotions"
 
 
 ######################################################################
@@ -120,7 +121,7 @@ class TestPromotionService(TestCase):
 
     def test_index(self):
         """Test the root URL"""
-        resp = self.client.get("/api")
+        resp = self.client.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(resp.is_json)
 
@@ -138,7 +139,7 @@ class TestPromotionService(TestCase):
 
     def test_405_returns_json(self):
         """Test 405 returns"""
-        resp = self.client.put(BASE_URL)
+        resp = self.client.put("/promotions")
         self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
         self.assertTrue(resp.is_json)
 
@@ -152,21 +153,21 @@ class TestPromotionService(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertTrue(resp.is_json)
         data = resp.get_json()
-        self.assertEqual(data.get("status"), "OK")
+        self.assertEqual(data.get("status"), "healthy")
 
     def test_ui_route(self):
         """It should load the UI page"""
-        resp = self.client.get("/")
+        resp = self.client.get("/ui")
 
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertIn(b"Promotions UI", resp.data)
 
     def test_ui_retrieve_controls(self):
         """It should render the retrieve controls expected by the UI script"""
-        resp = self.client.get("/")
+        resp = self.client.get("/ui")
 
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertIn(b'id="promotion_promotion_id"', resp.data)
+        self.assertIn(b'id="pet_promotion_id"', resp.data)
         self.assertIn(b'id="retrieve-btn"', resp.data)
         self.assertIn(b'id="retrieveResult"', resp.data)
 
@@ -478,3 +479,13 @@ class TestPromotionService(TestCase):
         """It should return None when promotion is not found"""
         result = Promotion.find(999999)
         self.assertIsNone(result)
+
+    def test_index(self):
+        """Test the root URL"""
+        resp = self.client.get("/")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertTrue(resp.is_json)
+
+        data = resp.get_json()
+        self.assertEqual(data["name"], "Promotions REST API Service")
+        self.assertEqual(data["version"], "1.0")

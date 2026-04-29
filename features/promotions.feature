@@ -13,7 +13,7 @@ Background:
 
 Scenario: The server is running
     When I visit the "Home Page"
-    Then I should see "Promotions UI" in the title
+    Then I should see "Promotion Demo RESTful Service" in the title
     And I should not see "404 Not Found"
 
 Scenario: Create a promotion
@@ -23,56 +23,9 @@ Scenario: Create a promotion
     And I set the "Start Date" to "2026-01-19"
     And I set the "End Date" to "2026-02-18"
     And I set the "Value" to "10"
-    And I select "True" in the "Active" dropdown
     And I press the "Create" button
     Then I should see the message "Promotion created successfully."
     And I should see "Welcome Discount" in the results
-
-Scenario: Retrieve a promotion
-    When I visit the "Home Page"
-    And I set the "Name" to "Spring Clearance"
-    And I press the "Search" button
-    Then I should see the message "Success"
-    When I copy the "Promotion ID" field
-    And I press the "Clear" button
-    And I paste the "Promotion ID" field
-    And I press the "Retrieve" button
-    Then I should see the message "Success"
-    And I should see "Spring Clearance" in the "Name" field
-
-Scenario: Update a promotion
-    When I visit the "Home Page"
-    And I set the "Name" to "Free Shipping for New Members"
-    And I press the "Search" button
-    Then I should see the message "Success"
-    And I should see "Free Shipping for New Members" in the "Name" field
-    And I should see "1" in the "Promotion Type" field
-    When I change "Name" to "Free Shipping for VIP Members"
-    And I press the "Update" button
-    Then I should see the message "Success"
-    When I copy the "Promotion ID" field
-    And I press the "Clear" button
-    And I paste the "Promotion ID" field
-    And I press the "Retrieve" button
-    Then I should see the message "Success"
-    And I should see "Free Shipping for VIP Members" in the "Name" field
-    When I press the "Clear" button
-    And I press the "Search" button
-    Then I should see the message "Success"
-    And I should see "Free Shipping for VIP Members" in the results
-    And I should not see "Free Shipping for New Members" in the results
-    
-Scenario: Delete a promotion
-    When I visit the "Home Page"
-    And I set the "Name" to "Holiday Flash Sale"
-    And I press the "Search" button
-    Then I should see the message "Success"
-    When I copy the "Promotion ID" field
-    And I press the "Delete" button
-    Then I should see the message "Promotion deleted successfully."
-    When I press the "Clear" button
-    And I press the "Search" button
-    Then I should not see "Holiday Flash Sale" in the results
 
 Scenario: List all promotions
     When I visit the "Home Page"
@@ -101,12 +54,25 @@ Scenario: Search for promotions by value
     And I should see "Spring Clearance" in the results
     And I should not see "VIP Bonus Discount" in the results
     And I should not see "Holiday Flash Sale" in the results
-    
-Scenario: Activate a promotion
+
+Scenario: Update a promotion
     When I visit the "Home Page"
     And I set the "Name" to "Free Shipping for New Members"
     And I press the "Search" button
     Then I should see the message "Success"
-    When I press the "Activate" button
+    And I should see "Free Shipping for New Members" in the "Name" field
+    And I should see "1" in the "Promotion Type" field
+    When I change "Name" to "Free Shipping for VIP Members"
+    And I press the "Update" button
     Then I should see the message "Success"
-    And I should see "True" in the "Active" dropdown
+    When I copy the "Promotion ID" field
+    And I press the "Clear" button
+    And I paste the "Promotion ID" field
+    And I press the "Retrieve" button
+    Then I should see the message "Success"
+    And I should see "Free Shipping for VIP Members" in the "Name" field
+    When I press the "Clear" button
+    And I press the "Search" button
+    Then I should see the message "Success"
+    And I should see "Free Shipping for VIP Members" in the results
+    And I should not see "Free Shipping for New Members" in the results

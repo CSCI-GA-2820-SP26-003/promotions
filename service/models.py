@@ -5,7 +5,6 @@ All of the models are stored in this module
 """
 
 import logging
-
 from datetime import date
 from flask_sqlalchemy import SQLAlchemy
 from service.utils import validate_promotion_value
