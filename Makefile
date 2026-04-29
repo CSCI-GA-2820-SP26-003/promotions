@@ -1,5 +1,5 @@
 # These can be overidden with env vars.
-REGISTRY ?= cluster-registry:5000
+REGISTRY ?= localhost:5000
 IMAGE_NAME ?= promotions
 IMAGE_TAG ?= 1.0
 IMAGE ?= $(REGISTRY)/$(IMAGE_NAME):$(IMAGE_TAG)
@@ -66,7 +66,7 @@ cluster-rm: ## Remove a K3D Kubernetes cluster
 .PHONY: deploy
 deploy: ## Deploy the service on local Kubernetes
 	$(info Deploying service locally...)
-	kubectl apply -R -f k8s/
+	kubectl apply -f k8s/deployment.yaml -f k8s/service.yaml -f k8s/ingress.yaml -f k8s/postgres/
 
 ############################################################
 # COMMANDS FOR BUILDING THE IMAGE
