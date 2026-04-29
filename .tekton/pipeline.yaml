@@ -95,12 +95,27 @@ spec:
         - name: source
           workspace: pipeline-workspace
 
+    - name: deploy
+      taskRef:
+        name: deploy-image
+        kind: Task
+      runAfter:
+        - build
+      params:
+        - name: image-name
+          value: "$(params.build-image)"
+        - name: manifest-dir
+          value: k8s
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
+
     - name: behave-test
       taskRef:
         name: behave
         kind: Task
       runAfter:
-        - git-clone
+        - deploy
       params:
         - name: base-url
           value: $(params.base-url)
