@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: github-webhook-secret
+type: Opaque
+stringData:
+  secretToken: change-me
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: promotions-eventlistener
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: promotions-eventlistener-binding
+subjects:
+  - kind: ServiceAccount
+    name: promotions-eventlistener
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: tekton-triggers-eventlistener-roles
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: promotions-push-binding
+spec:
+  params:
+    - name: git-repo
+      value: $(body.repository.clone_url)
+    - name: git-ref
+      value: $(body.ref)
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: promotions-pipeline-template
+spec:
+  params:
+    - name: git-repo
+      description: The git repository URL from the webhook payload
+    - name: git-ref
+      description: The git ref from the webhook payload
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        generateName: promotion-cd-pipeline-run-
+      spec:
+        pipelineRef:
+          name: promotion-cd-pipeline
+        params:
+          - name: GIT_REPO
+            value: $(tt.params.git-repo)
+          - name: GIT_REF
+            value: $(tt.params.git-ref)
+        workspaces:
+          - name: pipeline-workspace
+            persistentVolumeClaim:
+              claimName: pipeline-pvc
+        serviceAccountName: pipeline
+---
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: promotions-webhook-listener
+spec:
+  serviceAccountName: promotions-eventlistener
+  triggers:
+    - name: github-push-master
+      interceptors:
+        - ref:
+            name: github
+            kind: ClusterInterceptor
+            apiVersion: triggers.tekton.dev/v1alpha1
+          params:
+            - name: secretRef
+              value:
+                secretName: github-webhook-secret
+                secretKey: secretToken
+            - name: eventTypes
+              value:
+                - push
+        - ref:
+            name: cel
+          params:
+            - name: filter
+              value: body.ref == 'refs/heads/master'
+      bindings:
+        - ref: promotions-push-binding
+      template:
+        ref: promotions-pipeline-template
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: promotions-webhook-listener
+spec:
+  to:
+    kind: Service
+    name: el-promotions-webhook-listener
