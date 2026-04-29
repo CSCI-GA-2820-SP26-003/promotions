@@ -5,7 +5,8 @@ All of the models are stored in this module
 """
 
 import logging
-from datetime import date
+
+# from datetime import dat
 from flask_sqlalchemy import SQLAlchemy
 from service.utils import validate_promotion_value
 from .utils import PromotionType, _parse_date
@@ -49,7 +50,7 @@ class Promotion(db.Model):
         """
         Creates a Promotion to the database
         """
-        self.active = date.today() >= self.start_date and date.today() <= self.end_date
+        # self.active = date.today() >= self.start_date and date.today() <= self.end_date
         logger.info("Creating Promotion")
         logger.info("ID=%s", self.id)
         logger.info("name=%s", self.name)
