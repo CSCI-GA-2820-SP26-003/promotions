@@ -24,6 +24,7 @@ Steps file for web interactions with Selenium
 For information on Waiting until elements are present in the HTML see:
     https://selenium-python.readthedocs.io/waits.html
 """
+
 import re
 import logging
 from typing import Any
@@ -31,8 +32,10 @@ from behave import when, then  # pylint: disable=no-name-in-module
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select, WebDriverWait
 from selenium.webdriver.support import expected_conditions
+from selenium.common.exceptions import TimeoutException
 
-ID_PREFIX = "pet_"
+ID_PREFIX = "promotion_"
+
 
 def save_screenshot(context: Any, filename: str) -> None:
     """Takes a snapshot of the web page for debugging and validation
@@ -72,8 +75,15 @@ def step_impl(context: Any, text_string: str) -> None:
 def step_impl(context: Any, element_name: str, text_string: str) -> None:
     element_id = ID_PREFIX + element_name.lower().replace(" ", "_")
     element = context.driver.find_element(By.ID, element_id)
-    element.clear()
-    element.send_keys(text_string)
+    # Use JavaScript for date inputs to avoid Selenium send_keys segment corruption
+    input_type = element.get_attribute("type")
+    if input_type == "date":
+        context.driver.execute_script(
+            "arguments[0].value = arguments[1];", element, text_string
+        )
+    else:
+        element.clear()
+        element.send_keys(text_string)
 
 
 @when('I select "{text}" in the "{element_name}" dropdown')
@@ -131,7 +141,7 @@ def step_impl(context: Any, element_name: str) -> None:
 
 @when('I press the "{button}" button')
 def step_impl(context: Any, button: str) -> None:
-    button_id = button.lower().replace(" ", "_") + "-btn"
+    button_id = button.lower().replace(" ", "-") + "-btn"
     context.driver.find_element(By.ID, button_id).click()
 
 
@@ -153,14 +163,20 @@ def step_impl(context: Any, name: str) -> None:
 
 @then('I should see the message "{message}"')
 def step_impl(context: Any, message: str) -> None:
-    # Uncomment next line to take a screenshot of the web page for debugging
-    # save_screenshot(context, message)
-    found = WebDriverWait(context.driver, context.wait_seconds).until(
-        expected_conditions.text_to_be_present_in_element(
-            (By.ID, "flash_message"), message
+    try:
+        found = WebDriverWait(context.driver, context.wait_seconds).until(
+            expected_conditions.text_to_be_present_in_element(
+                (By.ID, "flash_message"), message
+            )
         )
-    )
-    assert found
+        assert found
+    except TimeoutException:
+        # Print what the flash message actually contains to help diagnose
+        actual = context.driver.find_element(By.ID, "flash_message").text
+        print(
+            f"\n[DEBUG] Flash message timeout. Expected: '{message}'. Actual: '{actual}'"
+        )
+        raise
 
 
 ##################################################################
