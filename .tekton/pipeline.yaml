@@ -18,7 +18,7 @@ spec:
     - name: build-image
       type: string
       description: The fully qualified image name to build and push
-      default: image-registry.openshift-image-registry.svc:5000/curieyoon-dev/promotions:latest
+      default: image-registry.openshift-image-registry.svc:5000/jkim231-dev/promotions:latest
 
   workspaces:
     - name: pipeline-workspace
@@ -72,7 +72,7 @@ spec:
 
     - name: unit-test
       taskRef:
-        name: unit-test
+        name: pytest-env
         kind: Task
       runAfter:
         - git-clone
@@ -93,13 +93,21 @@ spec:
       workspaces:
         - name: source
           workspace: pipeline-workspace
-
+    - name: deploy
+      taskRef:
+        name: apply-manifests
+        kind: Task
+      runAfter:
+        - build
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
     - name: behave-test
       taskRef:
         name: behave
         kind: Task
       runAfter:
-        - git-clone
+        - deploy
       params:
         - name: base-url
           value: $(params.base-url)

@@ -10,18 +10,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: promotions-eventlistener
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: promotions-eventlistener-binding
-subjects:
-  - kind: ServiceAccount
-    name: promotions-eventlistener
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: tekton-triggers-eventlistener-roles
+
 ---
 apiVersion: triggers.tekton.dev/v1beta1
 kind: TriggerBinding
@@ -60,7 +49,7 @@ spec:
         workspaces:
           - name: pipeline-workspace
             persistentVolumeClaim:
-              claimName: pipeline-pvc
+              claimName: promotion-pipeline-pvc
         serviceAccountName: pipeline
 ---
 apiVersion: triggers.tekton.dev/v1beta1
@@ -68,27 +57,9 @@ kind: EventListener
 metadata:
   name: promotions-webhook-listener
 spec:
-  serviceAccountName: promotions-eventlistener
+  serviceAccountName: pipeline  
   triggers:
-    - name: github-push-master
-      interceptors:
-        - ref:
-            name: github
-            kind: ClusterInterceptor
-            apiVersion: triggers.tekton.dev/v1alpha1
-          params:
-            - name: secretRef
-              value:
-                secretName: github-webhook-secret
-                secretKey: secretToken
-            - name: eventTypes
-              value:
-                - push
-        - ref:
-            name: cel
-          params:
-            - name: filter
-              value: body.ref == 'refs/heads/master'
+    - name: github-push
       bindings:
         - ref: promotions-push-binding
       template:

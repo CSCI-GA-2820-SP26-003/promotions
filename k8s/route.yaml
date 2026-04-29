@@ -1,0 +1,10 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: promotions
+spec:
+  to:
+    kind: Service
+    name: promotions-service
+  port:
+    targetPort: 80
