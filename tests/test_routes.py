@@ -166,7 +166,7 @@ class TestPromotionService(TestCase):
         resp = self.client.get("/")
 
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertIn(b'id="promotion_id"', resp.data)
+        self.assertIn(b'id="promotion_promotion_id"', resp.data)
         self.assertIn(b'id="retrieve-btn"', resp.data)
         self.assertIn(b'id="retrieveResult"', resp.data)
 
