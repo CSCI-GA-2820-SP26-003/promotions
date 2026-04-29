@@ -17,33 +17,30 @@
           <h1>Promotions UI</h1>
       </div>
 
-      <!-- Flash Message -->
       <div class="table-responsive">
         <table class="table">
           <tr><td>Status:</td><td><span id="flash_message"></span></td></tr>
         </table>
       </div>
 
-      <!-- FORM -->
       <div class="col-md-12" id="form_data">
         <h3>Create, Retrieve, Update, and Delete a Promotion:</h3>
         <div class="well">
           <div class="form-horizontal">
             <div class="form-group">
-              <label class="control-label col-sm-2" for="pet_promotion_id">Promotion ID:</label>
+              <label class="control-label col-sm-2" for="promotion_promotion_id">Promotion ID:</label>
               <div class="col-sm-6">
-                <input type="text" class="form-control" id="pet_promotion_id" placeholder="Enter ID of Promotion">
+                <input type="text" class="form-control" id="promotion_promotion_id" placeholder="Enter ID of Promotion">
               </div>
               <div class="col-sm-4">
                 <button type="button" class="btn btn-primary" id="retrieve-btn">Retrieve</button>
                 <button type="button" class="btn btn-danger" id="delete-btn">Delete</button>
               </div>
             </div>
-          </div> <!-- form horizontal -->
+          </div>
 
           <div class="form-horizontal">
 
-            <!-- NAME -->
             <div class="form-group">
               <label class="control-label col-sm-2" for="promotion_name">Name:</label>
               <div class="col-sm-10">
@@ -51,68 +48,64 @@
               </div>
             </div>
 
-            <!-- VALUE -->
             <div class="form-group">
-              <label class="control-label col-sm-2" for="promotion_name">Value:</label>
+              <label class="control-label col-sm-2" for="promotion_value">Value:</label>
               <div class="col-sm-10">
-                <input type="text" class="form-control" id="promotion_name" placeholder="Enter name for Promotion">
+                <input type="text" class="form-control" id="promotion_value" placeholder="Enter value for Promotion">
               </div>
             </div>
 
-            <!-- PROMOTION TYPE -->
             <div class="form-group">
-              <label class="control-label col-sm-2" for="promotion_available">Promotion Type:</label>
+              <label class="control-label col-sm-2" for="promotion_promotion_type">Promotion Type:</label>
               <div class="col-sm-10">
-                <select class="form-control" id="promotion_available">
-                  <option value="percent-off" selected>Percent Off</option>
-                  <option value="buy-n-get-one">Buy N Get 1</option>
-                  <option value="fixed-discount">Fixed Discount</option>
-                  <option value="free-shipping">Free Shipping</option>
+                <select class="form-control" id="promotion_promotion_type">
+                  <option value="">-- Any --</option>
+                  <option value="1">PERCENT_OFF</option>
+                  <option value="2">BUY_N_GET_ONE</option>
+                  <option value="3">FIXED_DISCOUNT</option>
+                  <option value="4">FREE_SHIPPING</option>
                 </select>
               </div>
             </div>
 
-            <!-- START DATE -->
             <div class="form-group">
-              <label class="control-label col-sm-2" for="start_date">Start Date:</label>
+              <label class="control-label col-sm-2" for="promotion_start_date">Start Date:</label>
               <div class="col-sm-10">
-                <input type="date" class="form-control" id="promotion_birthday" placeholder="2020-04-01">
+                <input type="date" class="form-control" id="promotion_start_date" placeholder="2026-01-19">
               </div>
             </div>
 
-            <!-- END DATE -->
             <div class="form-group">
-              <label class="control-label col-sm-2" for="end_date">End Date:</label>
+              <label class="control-label col-sm-2" for="promotion_end_date">End Date:</label>
               <div class="col-sm-10">
-                <input type="date" class="form-control" id="promotion_birthday" placeholder="2020-04-01">
+                <input type="date" class="form-control" id="promotion_end_date" placeholder="2026-02-18">
               </div>
             </div>
 
-            <!-- ACTIVE -->
             <div class="form-group">
-              <label class="control-label col-sm-2" for="promotion-active">Active:</label>
+              <label class="control-label col-sm-2" for="promotion_active">Active:</label>
               <div class="col-sm-10">
                 <select class="form-control" id="promotion_active">
-                  <option value="active" selected>Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="">-- Any --</option>
+                  <option value="true">True</option>
+                  <option value="false">False</option>
                 </select>
               </div>
             </div>
 
-            <!-- SUBMIT BUTTONS -->
             <div class="form-group">
               <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" class="btn btn-primary" id="search-btn">Search</button>
-                <button type="submit" class="btn btn-primary" id="clear-btn">Clear</button>
-                <button type="submit" class="btn btn-success" id="create-btn">Create</button>
-                <button type="submit" class="btn btn-warning" id="update-btn">Update</button>
+                <button type="button" class="btn btn-primary" id="search-btn">Search</button>
+                <button type="button" class="btn btn-primary" id="clear-btn">Clear</button>
+                <button type="button" class="btn btn-success" id="create-btn">Create</button>
+                <button type="button" class="btn btn-warning" id="update-btn">Update</button>
+                <button type="button" class="btn btn-success" id="activate-btn">Activate</button>
               </div>
             </div>
-          </div> <!-- form horizontal -->
-        </div> <!-- end well -->
-      </div> <!-- end Form -->
+          </div>
+        </div>
+      </div>
 
-      <!-- Search Results -->
       <div class="table-responsive col-md-12" id="retrieveResult">
         <table class="table table-striped">
           <thead>
@@ -132,10 +125,10 @@
           <tr>
             <th class="col-md-1">ID</th>
             <th class="col-md-4">Name</th>
-            <th class="col-md-4">Category</th>
-            <th class="col-md-3">Available</th>
-            <th class="col-md-3">Gender</th>
-            <th class="col-md-3">Birthday</th>
+            <th class="col-md-4">Description</th>
+            <th class="col-md-3">Promotion Type</th>
+            <th class="col-md-3">Value</th>
+            <th class="col-md-3">Active</th>
           </tr>
           </thead>
         </table>
@@ -146,11 +139,9 @@
         <p>&copy; NYU DevOps Company 2022</p>
       </footer>
 
-    </div> <!-- container -->
-
-  <script type="text/javascript" src="/static/js/jquery-3.6.0.min.js"></script>
-  <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="/static/js/ui_query_test.js"></script>
-
+    </div>
+    <script type="text/javascript" src="/static/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/ui_query_test.js"></script>
   </body>
 </html>

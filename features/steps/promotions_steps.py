@@ -22,6 +22,7 @@ Steps file for Promotion.feature
 For information on Waiting until elements are present in the HTML see:
     https://selenium-python.readthedocs.io/waits.html
 """
+
 import requests
 from compare3 import expect
 from behave import given  # pylint: disable=no-name-in-module
@@ -39,15 +40,15 @@ def step_impl(context):
     """Delete all Promotions and load new ones"""
 
     # Get a list all of the promotions
-    rest_endpoint = f"{context.base_url}/promotions"
+    rest_endpoint = f"{context.base_url}/api/promotions"
 
     context.resp = requests.get(rest_endpoint, timeout=WAIT_TIMEOUT)
 
     expect(context.resp.status_code).equal_to(HTTP_200_OK)
     # and delete them one by one
-    for pet in context.resp.json():
+    for promotion in context.resp.json():
         context.resp = requests.delete(
-            f"{rest_endpoint}/{pet['id']}", timeout=WAIT_TIMEOUT
+            f"{rest_endpoint}/{promotion['id']}", timeout=WAIT_TIMEOUT
         )
         expect(context.resp.status_code).equal_to(HTTP_204_NO_CONTENT)
 
