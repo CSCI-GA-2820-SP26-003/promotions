@@ -382,3 +382,36 @@ spec:
   volumes:
     - name: varlibcontainers
       emptyDir: {}
+      
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: unit-test
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/categories: Testing
+    tekton.dev/pipelines.minVersion: "0.17.0"
+    tekton.dev/tags: python, pytest
+    tekton.dev/displayName: "unit tests"
+    tekton.dev/platforms: "linux/amd64"
+spec:
+  workspaces:
+    - name: source
+  description: >-
+    This task runs the unit tests with pytest.
+  steps:
+    - name: unit-test
+      image: quay.io/rofrano/python:3.12-slim
+      workingDir: $(workspaces.source.path)
+      script: |
+        #!/bin/bash
+        set -e
+        export PATH=$PATH:$HOME/.local/bin:
+
+        echo "***** Installing dependencies *****"
+        python -m pip install --user -r requirements.txt
+
+        echo "***** Running Unit Tests *****"
+        pytest

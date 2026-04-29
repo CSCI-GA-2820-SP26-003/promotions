@@ -71,9 +71,9 @@ spec:
         - name: source
           workspace: pipeline-workspace
 
-    - name: tests
+    - name: unit-test
       taskRef:
-        name: pytest-env
+        name: unit-test
         kind: Task
       runAfter:
         - git-clone
@@ -86,7 +86,7 @@ spec:
         name: buildah
         kind: Task
       runAfter:
-        - tests
+        - unit-test
         - lint
       params:
         - name: IMAGE
