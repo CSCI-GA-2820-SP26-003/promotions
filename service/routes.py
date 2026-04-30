@@ -197,7 +197,7 @@ class PromotionCollection(Resource):
 
         try:
             promotion.deserialize(data)
-            promotion.create()
+            promotion.create(preserve_active=True)
         except DataValidationError as error:
             return {"message": str(error)}, status.HTTP_400_BAD_REQUEST
 

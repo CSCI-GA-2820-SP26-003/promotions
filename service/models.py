@@ -49,14 +49,12 @@ class Promotion(db.Model):
             f"active=[{self.active}]>"
         )
 
-    def create(self):
+    def create(self, preserve_active=False):
         """
         Creates a Promotion to the database
         """
-        if not getattr(self, "_active_supplied", False):
-            self.active = (
-                date.today() >= self.start_date and date.today() <= self.end_date
-            )
+        if not preserve_active:
+            self.active = self.start_date <= date.today() <= self.end_date
 
         logger.info("Creating Promotion")
         logger.info("ID=%s", self.id)
