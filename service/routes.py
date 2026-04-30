@@ -27,7 +27,7 @@ from flask import request, abort
 from flask import current_app as app  # Import Flask application
 from flask_restx import Namespace, Resource, fields
 from service import api
-from service.models import Promotion
+from service.models import Promotion, DataValidationError
 from service.common import status  # HTTP Status Codes
 from service.utils import PromotionType
 
@@ -189,8 +189,6 @@ class PromotionCollection(Resource):
         """
         Creates a Promotion
         """
-        from service.models import DataValidationError
-
         app.logger.info("Request to create a promotion")
 
         check_content_type("application/json")
