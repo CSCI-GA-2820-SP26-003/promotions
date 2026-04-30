@@ -27,7 +27,7 @@ from flask import request, abort
 from flask import current_app as app  # Import Flask application
 from flask_restx import Namespace, Resource, fields
 from service import api
-from service.models import Promotion, DataValidationError
+from service.models import Promotion, DataValidationError, db
 from service.common import status  # HTTP Status Codes
 from service.utils import PromotionType
 
@@ -308,7 +308,7 @@ class ActivatePromotion(Resource):
             )
 
         promotion.active = True
-        promotion.update()
+        db.session.commit()
 
         return promotion.serialize(), status.HTTP_200_OK
 
@@ -334,6 +334,6 @@ class DeactivatePromotion(Resource):
             )
 
         promotion.active = False
-        promotion.update()
+        db.session.commit()
 
         return promotion.serialize(), status.HTTP_200_OK
