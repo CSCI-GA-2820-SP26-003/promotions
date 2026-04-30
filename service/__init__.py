@@ -65,11 +65,6 @@ def create_app():
 
     from service.models import db  # pylint: disable=import-outside-toplevel
 
-    # pylint: disable=import-outside-toplevel
-    from service.common.cli_commands import (
-        db_create,
-    )
-
     db.init_app(app)
 
     with app.app_context():
@@ -77,6 +72,11 @@ def create_app():
         # pylint: disable=wrong-import-position, wrong-import-order, unused-import
         from service import routes  # pylint: disable=import-outside-toplevel
         from service import models  # pylint: disable=import-outside-toplevel
+
+        # pylint: disable=import-outside-toplevel
+        from service.common.cli_commands import (
+            db_create,
+        )
 
         app.cli.command("db-create")(db_create)
 
