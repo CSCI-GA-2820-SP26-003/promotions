@@ -67,7 +67,11 @@ def create_app():
         # pylint: disable=wrong-import-position, wrong-import-order, unused-import
         from service import routes  # pylint: disable=import-outside-toplevel
         from service import models  # pylint: disable=import-outside-toplevel
+        from service.common import (
+            cli_commands,
+        )  # pylint: disable=import-outside-toplevel
 
+        cli_commands.init_cli_commands(app)
         try:
             db.create_all()
         except Exception as error:  # pylint: disable=broad-except  # pragma: no cover
