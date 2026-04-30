@@ -105,7 +105,7 @@ $(function () {
                 value: parseInt($("#promotion_value").val()),
                 start_date: $("#promotion_start_date").val(),
                 end_date: $("#promotion_end_date").val(),
-                active: active == "true",
+                active: active == "True",
             };
             let ajax = $.ajax({
                 type: "POST",
@@ -145,7 +145,7 @@ $(function () {
             value: Number($("#promotion_value").val()),
             start_date: $("#promotion_start_date").val(),
             end_date: $("#promotion_end_date").val(),
-            active: $("#promotion_active").val() == "true"
+            active: $("#promotion_active").val() == "True"
         };
         let ajax = $.ajax({
             type: "PUT",
