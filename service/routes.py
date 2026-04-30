@@ -21,6 +21,8 @@ This service implements a REST API that allows you to Create, Read,
 and Delete Promotions
 """
 
+# pylint: disable=cyclic-import
+
 from flask import request, abort
 from flask import current_app as app  # Import Flask application
 from flask_restx import Namespace, Resource, fields

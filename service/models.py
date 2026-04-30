@@ -8,8 +8,7 @@ import logging
 
 from datetime import date
 from flask_sqlalchemy import SQLAlchemy
-from service.utils import validate_promotion_value
-from .utils import PromotionType, _parse_date
+from .utils import PromotionType, _parse_date, validate_promotion_value
 
 logger = logging.getLogger("flask.app")
 

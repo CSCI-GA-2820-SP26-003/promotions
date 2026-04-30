@@ -6,20 +6,24 @@ spec:
   params:
     - name: GIT_REPO
       type: string
-      description: The URL to the git repo
-      default: 'https://github.com/CSCI-GA-2820-SP26-003/promotions.git'
+      description: URL of the git repo
+      default: https://github.com/CSCI-GA-2820-SP26-003/promotions.git
     - name: GIT_REF
       type: string
-      description: The reference (branch or ref)
+      description: Target branch or sha of repo
       default: master
-    - name: base-url
+    - name: APP_NAME
       type: string
-      default: http://promotions:8080
-    - name: build-image
+      description: Name of app
+      default: promotions
+    - name: IMAGE_NAME
       type: string
-      description: The fully qualified image name to build and push
-      default: image-registry.openshift-image-registry.svc:5000/jkim231-dev/promotions:latest
-
+      description: Image to build and push
+      default: image-registry.openshift-image-registry.svc:5000/$(context.pipelineRun.namespace)/$(params.APP_NAME):latest
+    - name: BASE_URL 
+      type: string
+      description: Route URL for the deployed app
+      default: https://promotions-jkim231-dev.apps.rm3.7wse.p1.openshiftapps.com
   workspaces:
     - name: pipeline-workspace
 
@@ -34,83 +38,111 @@ spec:
             value: git-clone
           - name: namespace
             value: openshift-pipelines
+      workspaces:
+        - name: output
+          workspace: pipeline-workspace
       params:
         - name: URL
           value: $(params.GIT_REPO)
         - name: REVISION
           value: $(params.GIT_REF)
-        - name: SUBMODULES
-          value: 'true'
         - name: DEPTH
-          value: '1'
+          value: "1"
         - name: SSL_VERIFY
-          value: 'true'
+          value: "true"
+        - name: SUBMODULES
+          value: "true"
         - name: DELETE_EXISTING
-          value: 'true'
+          value: "true"
         - name: VERBOSE
-          value: 'false'
+          value: "false"
         - name: USER_HOME
           value: /home/git
-        - name: CRT_FILENAME
-          value: ca-bundle.crt
-      workspaces:
-        - name: output
-          workspace: pipeline-workspace
 
     - name: lint
       taskRef:
         name: pylint
-        kind: Task
-      runAfter:
-        - git-clone
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
       params:
         - name: path
           value: service
-      workspaces:
-        - name: source
-          workspace: pipeline-workspace
-
-    - name: unit-test
-      taskRef:
-        name: pytest-env
-        kind: Task
       runAfter:
         - git-clone
+
+    - name: test
+      taskRef:
+        name: pytest-env
       workspaces:
         - name: source
           workspace: pipeline-workspace
-
-    - name: build
-      taskRef:
-        name: buildah
-        kind: Task
       runAfter:
-        - unit-test
-        - lint
+        - git-clone
+
+    - name: buildah
+      taskRef:
+        resolver: cluster
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: buildah
+          - name: namespace
+            value: openshift-pipelines
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
       params:
         - name: IMAGE
-          value: "$(params.build-image)"
-      workspaces:
-        - name: source
-          workspace: pipeline-workspace
+          value: $(params.IMAGE_NAME)
+        - name: DOCKERFILE
+          value: ./Dockerfile
+        - name: BUILD_ARGS
+          value:
+            - ""
+        - name: CONTEXT
+          value: .
+        - name: STORAGE_DRIVER
+          value: vfs
+        - name: FORMAT
+          value: oci
+        - name: BUILD_EXTRA_ARGS
+          value: ""
+        - name: PUSH_EXTRA_ARGS
+          value: ""
+        - name: SKIP_PUSH
+          value: "false"
+        - name: TLS_VERIFY
+          value: "true"
+        - name: VERBOSE
+          value: "false"
+      runAfter:
+        - lint
+        - test
+
     - name: deploy
       taskRef:
-        name: apply-manifests
-        kind: Task
-      runAfter:
-        - build
+        name: deploy-image
       workspaces:
         - name: source
           workspace: pipeline-workspace
-    - name: behave-test
+      params:
+        - name: app-name
+          value: $(params.APP_NAME)
+        - name: image-name
+          value: $(params.IMAGE_NAME)
+      runAfter:
+        - buildah
+
+    - name: bdd
       taskRef:
         name: behave
-        kind: Task
-      runAfter:
-        - deploy
-      params:
-        - name: base-url
-          value: $(params.base-url)
       workspaces:
         - name: source
           workspace: pipeline-workspace
+      params:
+        - name: base-url
+          value: $(params.BASE_URL)
+      runAfter:
+        - deploy
