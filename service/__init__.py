@@ -55,6 +55,11 @@ def create_app():
     app = Flask(__name__, static_folder="static", static_url_path="/static")
     app.config.from_object(config)
 
+    @app.errorhandler(404)
+    def not_found(error):
+        """Return JSON for 404 errors"""
+        return {"message": "Not Found"}, 404
+
     # Initialize Flask-RESTX
     api.init_app(app)
 
@@ -67,11 +72,11 @@ def create_app():
         # pylint: disable=wrong-import-position, wrong-import-order, unused-import
         from service import routes  # pylint: disable=import-outside-toplevel
         from service import models  # pylint: disable=import-outside-toplevel
-        from service.common import (
-            cli_commands,
+        from service.common.cli_commands import (
+            db_create,
         )  # pylint: disable=import-outside-toplevel
 
-        cli_commands.init_cli_commands(app)
+        app.cli.command("db-create")(db_create)
         try:
             db.create_all()
         except Exception as error:  # pylint: disable=broad-except  # pragma: no cover

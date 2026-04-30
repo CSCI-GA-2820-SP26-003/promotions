@@ -182,12 +182,15 @@ class PromotionCollection(Resource):
     ##################################################################
     # CREATE A NEW PROMOTION
     ##################################################################
+
     @promotions_ns.expect(promotion_model)
     @promotions_ns.marshal_with(promotion_model)
     def post(self):
         """
         Creates a Promotion
         """
+        from service.models import DataValidationError
+
         app.logger.info("Request to create a promotion")
 
         check_content_type("application/json")
@@ -195,8 +198,11 @@ class PromotionCollection(Resource):
         promotion = Promotion()
         data = request.get_json()
 
-        promotion.deserialize(data)
-        promotion.create()
+        try:
+            promotion.deserialize(data)
+            promotion.create()
+        except DataValidationError as error:
+            return {"message": str(error)}, status.HTTP_400_BAD_REQUEST
 
         location_url = f"{request.host_url.rstrip('/')}/api/promotions/{promotion.id}"
 
