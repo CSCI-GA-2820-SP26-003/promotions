@@ -25,6 +25,10 @@ class Promotion(db.Model):
     Class that represents a Promotion
     """
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self._active_supplied = False
+
     ##################################################
     # Table Schema
     ##################################################
@@ -49,7 +53,11 @@ class Promotion(db.Model):
         """
         Creates a Promotion to the database
         """
-        self.active = date.today() >= self.start_date and date.today() <= self.end_date
+        if not getattr(self, "_active_supplied", False):
+            self.active = (
+                date.today() >= self.start_date and date.today() <= self.end_date
+            )
+
         logger.info("Creating Promotion")
         logger.info("ID=%s", self.id)
         logger.info("name=%s", self.name)
@@ -122,6 +130,7 @@ class Promotion(db.Model):
             self.end_date = _parse_date(data["end_date"])
             self.value = data["value"]
             validate_promotion_value(self.promotion_type, self.value)
+            self._active_supplied = "active" in data
             self.active = data["active"]
         except KeyError as error:
             raise DataValidationError(
