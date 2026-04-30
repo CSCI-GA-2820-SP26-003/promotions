@@ -192,7 +192,7 @@ class Promotion(db.Model):
         if not isinstance(active, bool):
             raise TypeError("Invalid active, must be of type boolean")
         logger.info("Processing available query for %s ...", active)
-        return cls.query.filter(cls.active == active)
+        return cls.query.filter(cls.active == active).all()
 
     @classmethod
     def find_by_value(cls, value) -> list:

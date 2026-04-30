@@ -153,10 +153,9 @@ class PromotionCollection(Resource):
             )
 
         # Query by active status
-        elif active is not None:
+        elif active:
             active_value = str_to_bool(active)
 
-            # invalid active values should return empty list
             if active_value is None:
                 promotions = []
             else:

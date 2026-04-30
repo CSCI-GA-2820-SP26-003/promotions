@@ -15,7 +15,7 @@ spec:
     - name: APP_NAME
       type: string
       description: Name of app
-      default: promotions
+      default: promotion
     - name: IMAGE_NAME
       type: string
       description: Image to build and push
@@ -23,7 +23,7 @@ spec:
     - name: BASE_URL 
       type: string
       description: Route URL for the deployed app
-      default: https://promotions-jkim231-dev.apps.rm3.7wse.p1.openshiftapps.com
+      default: https://promotion-jkim231-dev.apps.rm3.7wse.p1.openshiftapps.com
   workspaces:
     - name: pipeline-workspace
 
