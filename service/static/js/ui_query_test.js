@@ -16,9 +16,9 @@ $(function () {
         $("#promotion_start_date").val(res.start_date);
         $("#promotion_end_date").val(res.end_date);
         if (res.active == true) {
-            $("#promotion_active").val("true");
+            $("#promotion_active").val("True");
         } else {
-            $("#promotion_active").val("false");
+            $("#promotion_active").val("False");
         }
     }
 
